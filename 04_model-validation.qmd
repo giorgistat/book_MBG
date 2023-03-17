@@ -1,0 +1,16 @@
+# Model validation
+
+This is a book created from markdown and executable code.
+
+See @knuth84 for additional discussion of literate programming.
+
+```{r}
+1 + 1
+```
+
+## How to simulate geostatistical data from a fitted model
+
+## Validating the calibration of the model
+
+## Validating the spatial correlation of the model
+
