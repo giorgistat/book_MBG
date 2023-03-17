@@ -2,9 +2,12 @@ project:
   type: book
 
 book:
-  title: "book_MBG"
-  author: "Jane Doe"
+  title: "Model-based geostatistics for global public health using R"
+  author:
+    - Emanuele Giorgi
+    - Claudio Fronterre
   date: "03/03/2023"
+  search: true
   chapters:
     - index.qmd
     - intro.qmd
