@@ -1,0 +1,22 @@
+# Exploratory analysis
+
+This is a book created from markdown and executable code.
+
+See @knuth84 for additional discussion of literate programming.
+
+```{r}
+1 + 1
+```
+
+## Importing and processing spatial data in R
+
+## Visualizing geostatistical data
+
+## Exploring associations
+
+## Analysis of the residuals
+
+### Diagnostics for overdispersion
+
+### Diagnostics for residual spatial variation
+
