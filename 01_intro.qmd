@@ -1,6 +1,4 @@
 ---
-filters:
-  - line-highlight
 execute: 
   freeze: auto
 fig-width: 5
