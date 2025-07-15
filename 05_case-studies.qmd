@@ -1,6 +1,4 @@
 ---
-filters:
-  - line-highlight
 execute: 
   freeze: auto
 fig-width: 5
@@ -8,13 +6,43 @@ fig-asp: 0.75
 ---
 
 ```{r, eval=TRUE, echo=FALSE,message=FALSE}
+library(malariaAtlas)
+library(dplyr)
+library(tidyr)
+library(sf)
+library(rgee)
+library(terra)
+library(rgeoboundaries)
+library(terra)
+library(grid)
+library(RiskMap)
 waz_fit <- readRDS("data/waz_fit.rds")
 haz_fit <- readRDS("data/haz_fit.rds")
 stunting_prev <- readRDS("data/stuntin_prev.rds")
 underw_prev <- readRDS("data/underw_prev.rds")
 assess_haz <- readRDS("data/assess_haz.rds")
 assess_waz <- readRDS("data/assess_waz.rds")
+load("data/case_study2.RData")
+mlw_admin0_sf <- readRDS("data/mlw_admin0_sf.rds")
+mlw_sf <- readRDS("data/mlw_sf.rds")
+mlw_pfpr <- readRDS("data/mlw_pfpr.rds")
+out_file <- "data/malawi_covariates_2006.tif"
+r_covs <- rast(out_file)
+vals <- terra::extract(r_covs, vect(mlw_sf))
+mlw_sf <- bind_cols(mlw_sf, vals[, -1])  # remove ID column
+mlw_crs <- propose_utm(mlw_sf)
+mlw_sf <- st_transform(mlw_sf, crs = mlw_crs)
+
+mlw_sf <- mlw_sf[, colSums(!is.na(mlw_sf)) > 0]
+
+mod_all_cov <- readRDS("data/mod_all_cov.rds")
+mod_pca <- readRDS("data/mod_pca.rds")
+pred_all_cov_prev <- readRDS("data/pred_all_cov_prev.rds")
+pred_pca_prev <- readRDS("data/pred_pca_prev.rds")
+assess_pred_mlw <- readRDS("data/assess_pred_mlw.rds")
+
 ```
+
 # Case studies {#sec-case-studies}
 
 ## Mapping stunting and underwieght risk in Ghana
@@ -23,9 +51,9 @@ Malnutrition remains a critical public health issue in many low- and middle-inco
 
 Two widely used anthropometric indicators derived from child growth measurements are:
 
-- Height-for-Age Z-score (HAZ): A measure of stunting, which reflects chronic malnutrition. Children with a HAZ below -2 standard deviations from the WHO growth reference median are considered stunted, indicating long-term nutritional deprivation or repeated infections.
+-   Height-for-Age Z-score (HAZ): A measure of stunting, which reflects chronic malnutrition. Children with a HAZ below -2 standard deviations from the WHO growth reference median are considered stunted, indicating long-term nutritional deprivation or repeated infections.
 
-- Weight-for-Age Z-score (WAZ): A composite indicator of underweight, capturing both acute and chronic malnutrition. Children with WAZ below -2 are considered underweight. This measure is commonly used in population-based surveys because it is relatively easy to collect and interpret.
+-   Weight-for-Age Z-score (WAZ): A composite indicator of underweight, capturing both acute and chronic malnutrition. Children with WAZ below -2 are considered underweight. This measure is commonly used in population-based surveys because it is relatively easy to collect and interpret.
 
 These Z-scores are calculated by comparing individual anthropometric measurements to the WHO Child Growth Standards, which were developed based on data from healthy children under optimal environmental and nutritional conditions [@who2006].
 
@@ -36,6 +64,7 @@ In this case study, we analyse HAZ and WAZ as continuous outcomes to assess the 
 ### Exploratory analysis
 
 We begin by loading the necessary R packages and the `malnutrition` dataset. This geostatistical dataset is derived from the 2014 Ghana Demographic and Health Survey (DHS) [@ghanaDHS2014], which provides nationally representative data on child health and nutrition. The dataset includes anthropometric measurements, household characteristics, and georeferenced sampling cluster coordinates, making it suitable for spatial analysis of child malnutrition.
+
 ```{r}
 # Load packages
 library(RiskMap)
@@ -52,7 +81,6 @@ The explanatory variables considered in this analysis are `age` and `wealth`. Fi
 To explore the relationship between age and nutritional status, the code below applies locally estimated scatterplot smoothing (LOESS) to highlight potential non-linear trends. In addition, we fit linear splines using the function `pmax()` to model a change in slope at specified knots—2 months for HAZ and 1 month for WAZ. These change points were selected heuristically based on visual inspection of the LOESS curves.
 
 As shown in Figure @fig-maln-expl, the linear splines (green dashed lines) closely follow the LOESS fits (solid red lines), indicating that the piecewise linear models provide an adequate approximation of the age-nutrition relationship.
-
 
 ```{r}
 #| label: fig-maln-expl
@@ -119,6 +147,7 @@ $$ {#eq-model-haz-waz}
 where $a_{ij}$ denotes the age in months of child $j$ in cluster $i$, and $w_i$ is the wealth score associated with cluster $i$; as previously stated, the change point $c$ of the linear spline is set to 2 months for HAZ and 1 month for WAZ. The term $Z_i$ is a Gaussian random effect with mean zero and variance $\tau^2$, capturing between-cluster variation not explained by the covariates. The error term $U_{ij}$ represents child-specific residual variation and is assumed to be Gaussian with mean zero and variance $\omega^2$.
 
 To fit this model, we create a cluster ID variable based on the sampling coordinates and include it as a random intercept in the `lmer` function to incorporate the term $Z_i$.
+
 ```{r}
 # Create ID for the location
 malnutrition <- malnutrition %>%
@@ -128,6 +157,7 @@ malnutrition <- malnutrition %>%
 ```
 
 We then fit the models using the `lmer` function.
+
 ```{r}
 library(lme4)
 haz_lmer <- 
@@ -139,8 +169,8 @@ waz_lmer <-
   lmer(WAZ ~ age + pmax(age - 1, 0) + wealth + (1 | loc_id), data = malnutrition)
 summary(waz_lmer)
 ```
-Of particular interest in the summary of the fitted models above are the estimates of the variances associated with the random effects: $\tau^2$ for the cluster-level terms $Z_i$, and $\omega^2$ for the child-specific residuals $U_{ij}$. The estimates suggest that $\omega^2$ is more than twenty times larger than $\tau^2$, indicating that the majority of the unexplained variation occurs at the individual child level rather than between clusters. This has important implications for interpretation: any subsequent mapping of the prevalence of stunting or underweight should acknowledge the high degree of within-cluster variability as a limitation. In particular, predictions at unsampled locations may be subject to substantial uncertainty driven by this fine-scale heterogeneity.
 
+Of particular interest in the summary of the fitted models above are the estimates of the variances associated with the random effects: $\tau^2$ for the cluster-level terms $Z_i$, and $\omega^2$ for the child-specific residuals $U_{ij}$. The estimates suggest that $\omega^2$ is more than twenty times larger than $\tau^2$, indicating that the majority of the unexplained variation occurs at the individual child level rather than between clusters. This has important implications for interpretation: any subsequent mapping of the prevalence of stunting or underweight should acknowledge the high degree of within-cluster variability as a limitation. In particular, predictions at unsampled locations may be subject to substantial uncertainty driven by this fine-scale heterogeneity.
 
 ### Assessing residual spatial correlation and model fitting
 
@@ -193,7 +223,7 @@ For our geostatistical analysis of HAZ and WAZ, we consider the following model:
 
 $$
 Y_{ij} = \beta_0 + \beta_1 a_{ij} + \beta_2 \max\{a_{ij} - c, 0\} + \beta_3 w_i + S(x_i) + U_{ij},
-$$ {#eq-model-haz-waz}
+$$
 
 where $S(x)$ is a zero-mean, stationary, and isotropic Gaussian process with variance $\sigma^2$ and an exponential correlation function with scale parameter $\phi$. In this geostatistical extension, we replace the cluster-level random effect $Z_i$ from @eq-model-haz-waz with the spatial process $S(x_i)$. The random effect $Z_i$ was previously used in the Binomial mixed model to account for unexplained variation between clusters. It is also possible to include both $S(x_i)$ and $Z_i$ in the model, so that the total unexplained variation between clusters is decomposed into a spatially structured component, $S(x_i)$, and an unstructured component, $Z_i$. However, this approach is not recommended in the initial model specification, as it may lead to identifiability issues. It can be considered later in the analysis if justified by model diagnostics.
 
@@ -215,7 +245,9 @@ waz_fit <-
   glgpm(HAZ ~ age + pmax(age - 1, 0) + wealth + gp(),
         data=malnutrition_sf, family = "gaussian") 
 ```
+
 We then summarize the fit of models.
+
 ```{r}
 summary(haz_fit)
 
@@ -226,7 +258,7 @@ The spatial component of the models reveals a moderate degree of spatial structu
 
 ### Prediction and assessment of model calibration
 
-Stunting and underweight are standard indicators used to assess child malnutrition. A child is defined as \textit{stunted} if their height-for-age $z$-score (HAZ) is below $-2$ standard deviations from the median of the WHO Child Growth Standards, i.e., HAZ < -2. Similarly, a child is considered \textit{underweight} if their weight-for-age $z$-score (WAZ) falls below $-2$, i.e., WAZ < -2 [@sdg2201meta2025]. These thresholds are based on the World Health Organization (WHO) growth reference standards, which provide a normative basis for assessing nutritional status in children under five years of age [@who_underweight2024].
+Stunting and underweight are standard indicators used to assess child malnutrition. A child is defined as \textit{stunted} if their height-for-age $z$-score (HAZ) is below $-2$ standard deviations from the median of the WHO Child Growth Standards, i.e., HAZ \< -2. Similarly, a child is considered \textit{underweight} if their weight-for-age $z$-score (WAZ) falls below $-2$, i.e., WAZ \< -2 [@sdg2201meta2025]. These thresholds are based on the World Health Organization (WHO) growth reference standards, which provide a normative basis for assessing nutritional status in children under five years of age [@who_underweight2024].
 
 We now define the predictive targets for stunting and underweight prevalence in terms of the adopted geostatistical model. Both indicators correspond to the probability that a child's z-score falls below $-2$, that is, $Y(x) < -2$, where $Y(x)$ denotes either the HAZ or WAZ score at location $x$. Under the model specification, the prevalence is therefore defined as
 
@@ -237,7 +269,7 @@ $$ {#eq-prev-maln}
 where $\Phi(\cdot)$ is the cumulative distribution function of the standard normal distribution, $\mu$ is the linear predictor including the effects of covariates at individual- and cluster-level (as defined by the coefficients $\beta_1$ to $\beta_3$ of @eq-model-haz-waz) as well as the intercept, and $\omega^2$ is the variance of the individual-level residual term. In @eq-prev-maln, we condition on $S(x)$ because this allows us to define both stunting an underweight prevalence as a spatially varying predictive target.
 
 To implement this in `RiskMap`, we begin by generating a predictive grid over the study region. In this case, we use a regular grid with 10 km by 10 km resolution. We then draw predictive samples of the spatial effect $S(x)$ at each grid location, conditional on the observed data. For the `age` variable, we fix it at 2 months for HAZ and 1 month for WAZ, respectively. The `wealth` variable is set to its lowest value of 1. These choices are made to visualize the predictive target for the subgroup of children most at risk of stunting and underweight, as identified through exploratory analysis and the estimated regression coefficients. The code below illustrates this procedure.
- 
+
 ```{r, eval=FALSE}
 # Boundaries of Ghana
 library(rgeoboundaries)
@@ -292,7 +324,6 @@ underw_prev <-
 
 Finally, we visualize the results in the map shown in @fig-maln-pred. The maps reveal a clear hotspot for both stunting and underweight, with predicted prevalence values reaching approximately $45\%$ and $24\%$, respectively. Notably, this same region also exhibits lower predictive uncertaint, measured by the coefficient of variation, compared to other areas in Ghana.
 
-
 ```{r}
 #| label: fig-maln-pred
 #| fig-cap: "Predictive mean and coefficient of variation for stunting and underweight prevalence estimates. The top row shows predictions for stunting, while the bottom row corresponds to underweight. For each indicator, the left panel shows the predictive mean and the right panel the coefficient of variation."
@@ -316,8 +347,7 @@ plot(underw_prev, which_target = "prev", which_summary = "cv",
      main = "Underweight: Coefficient of Variation")
 ```
 
-
-To assess the predictive performance and calibration of our geostatistical models for HAZ and WAZ, we perform a cross-validation exercise using the `assess_pp` function. Cross-validation is conducted by repeatedly splitting the data into training and testing sets, ensuring that prediction locations are at least 5 km away from the nearest training point. Specifically, we set `n_size = 100` prediction locations for the test set, impose a minimum distance constraint of 5 km (`min_dist = 5`), and repeat the process over 10 test sets randomly drawn under those conditions (`iter = 10`) using `method="regularized"` as the sampling method. 
+To assess the predictive performance and calibration of our geostatistical models for HAZ and WAZ, we perform a cross-validation exercise using the `assess_pp` function. Cross-validation is conducted by repeatedly splitting the data into training and testing sets, ensuring that prediction locations are at least 5 km away from the nearest training point. Specifically, we set `n_size = 100` prediction locations for the test set, impose a minimum distance constraint of 5 km (`min_dist = 5`), and repeat the process over 10 test sets randomly drawn under those conditions (`iter = 10`) using `method="regularized"` as the sampling method.
 
 ```{r, eval=FALSE}
 # HAZ
@@ -337,6 +367,7 @@ assess_waz <-
             method = "regularized")
 
 ```
+
 We note that for a Gaussian linear geostatistical model, the `assess_pp` function does not compute the average non-randomized probability integral transform (AnPIT, introduced in @sec-anpit), as this measure is specifically designed for count outcomes. Instead, it employs the standard probability integral transform (PIT), defined as $\text{PIT}(y) = F_{M}(y)$, where $F_{M}(y)$ is the cumulative distribution function of the predictive distribution evaluated at the observed value $y$. The PIT transforms the observed outcomes in the test set such that, if the model is well-calibrated, these transformed values should follow a uniform distribution. Deviations from uniformity indicate potential issues with calibration and predictive accuracy.
 
 @fig-maln-pit shows the results of the cross-validation exercise visualized through PIT curves for HAZ and WAZ. Similarly to the way we have interpreted the AnPIT curves, the PIT curves indicate good calibration when they lie close to the identity line, meaning the predictive distributions accurately reflect the observed variability in the test sets. The results shown in @fig-maln-pit demonstrate that, for all ten test sets and for both HAZ and WAZ, the PIT curves closely align with the identity line, confirming that the models are well-calibrated and provide reliable uncertainty quantification.
@@ -358,12 +389,647 @@ grid.arrange(p_haz, p_waz, ncol = 2)
 
 ### Summary and conclusions
 
-This case study demonstrated the utility of geostatistical modeling for mapping child malnutrition in Ghana using continuous anthropometric measurements, namely HAZ and WAZ Z-scores. By modeling these outcomes directly, we were able to define stunting and underweight prevalence as predictive probabilities based on threshold exceedance (e.g., HAZ < -2), rather than by dichotomizing the data prior to analysis. This approach allowed us to retain the full information content of the measurements and to produce spatially resolved predictions of prevalence along with associated uncertainty estimates. Readers interested in a more in-depth treatment of this modeling strategy are referred to @kyomuhangi2021, which discusses the loss of information and degradation in predictive performance that can result from dichotomizing continuous outcomes in geostatistical settings.
+This case study demonstrated the utility of geostatistical modeling for mapping child malnutrition in Ghana using continuous anthropometric measurements, namely HAZ and WAZ Z-scores. By modeling these outcomes directly, we were able to define stunting and underweight prevalence as predictive probabilities based on threshold exceedance (e.g., HAZ \< -2), rather than by dichotomizing the data prior to analysis. This approach allowed us to retain the full information content of the measurements and to produce spatially resolved predictions of prevalence along with associated uncertainty estimates. Readers interested in a more in-depth treatment of this modeling strategy are referred to @kyomuhangi2021, which discusses the loss of information and degradation in predictive performance that can result from dichotomizing continuous outcomes in geostatistical settings.
 
 More broadly, this case study illustrated how geostatistical models can be used to analyze individual-level outcomes while accounting for both child-level and household-level covariates. Aggregation of data across individuals, such as using average HAZ or WAZ scores per location, is not required and can in fact introduce several complications. In particular, the number of children per cluster varies, which implies that an analysis based on cluster-level averages would require a heteroscedastic specification for the residual term to appropriately reflect varying precision across locations. Ignoring this could lead to unreliable predictive inferences.
 
 In conclusion, this analysis showed that neither dichotomization nor aggregation is necessary in geostaistical analysis. Instead, geostatistical models should be fitted to individual-level continuous outcomes, and suitable predictive targets and summaries of uncertainty can then be derived from the fitted model.
 
-## Mapping river blindness in Malawi
+## Mapping malaria in Malawi
+
+In this section, we demonstrate how to conduct a geostatistical analysis using Malaria Indicator Survey (MIS) data accessed through the `malariaAtlas` R package [@malariaAtlas]. This package provides streamlined access to a curated repository of georeferenced malaria data, including prevalence surveys and associated metadata, making it a valuable resource for spatial epidemiological studies. The primary aim here is to illustrate how relevant environmental covariates can be obtained via Google Earth Engine and incorporated into a geostatistical model for prevalence mapping. Although the analysis is not guided by a specific research question, its value lies in showcasing the full workflow and technical aspects introduced in previous chapters, including data preparation, covariate extraction, exploratory analysis, model fitting, and spatial prediction of disease prevalence.
+
+### Downloading prevalence and raster data
+
+This section illustrates how to access and visualize Malaria Indicator Survey data using the `malariaAtlas` R package, focusing on *Plasmodium falciparum* prevalence in Malawi for the year 2006. We walk through the steps to extract survey data, obtain country boundaries, and produce a basic map of raw prevalence data.
+
+We begin by loading the necessary packages and initializing the Earth Engine API via the `rgee` package.
+
+```{r, eval=FALSE}
+# Load libraries
+library(malariaAtlas)
+library(dplyr)
+library(tidyr)
+library(sf)
+library(rgee)
+library(terra)
+library(rgeoboundaries)
+library(grid)
+
+# Initialize Earth Engine
+ee_Initialize()
+```
+
+We then use `rgeoboundaries` to obtain Malawi’s administrative boundary and extract P. falciparum prevalence survey data from the `malariaAtlas` package for surveys conducted in or overlapping the year 2006.
+
+```{r, eval=FALSE}
+# Get Malawi boundary
+mlw_admin0_sf <- geoboundaries(country = "Malawi", adm_lvl = "adm0")
+mlw_admin0_ee <- sf_as_ee(mlw_admin0_sf)
+
+# Download PfPR survey data
+mlw_pfpr <- getPR(country = "Malawi", species = "Pf") %>%
+  filter(year_start <= 2006 & year_end >= 2006) %>%
+  filter(!is.na(longitude) & !is.na(latitude))
+
+# Convert to sf object
+mlw_sf <- st_as_sf(mlw_pfpr, coords = c("longitude", "latitude"), crs = 4326)
+
+# Convert to UTM 
+mlw_crs <- propose_utm(mlw_sf)
+mlw_sf <- st_transform(mlw_sf, crs = mlw_crs)
+
+# Remove columns with all NAs
+mlw_sf <- mlw_sf[, colSums(!is.na(mlw_sf)) > 0]
+```
+
+The following map displays the raw prevalence data at each survey location. The size and color of each point reflect the estimated malaria prevalence (pr) at that location.
+
+```{r,collapse=TRUE}
+#| label: fig-malawi-raw-map
+#| fig-cap: "Raw PfPR survey data for Malawi in 2006. Each point represents a georeferenced survey location, with color and size indicating estimated prevalence."
+#| fig-align: center
+
+# Compute prevalence
+# Compute observed prevalence
+mlw_sf$pr <- mlw_sf$positive / mlw_sf$examined
+
+# Plot raw PfPR data with uniform point size and no axis labels
+ggplot() +
+  geom_sf(data = mlw_admin0_sf, fill = "white", color = "black") +
+  geom_sf(data = mlw_sf, aes(color = pr), size = 1, alpha = 0.8) +
+  scale_color_viridis_c(name = "PfPR") +
+  theme_minimal() +
+  ggtitle("Malaria Prevalence in Malawi (2006)") +
+  theme(
+    legend.position = "right",
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+
+```
+
+In the next step we retrieve a suite of environmental covariates that are mechanistically linked to malaria transmission and therefore commonly included in spatial risk-mapping studies. All layers are clipped to the Malawi national boundary and combined into a single multi-band image ready for extraction at the survey points.
+
+These covariates are summarised in Table @tbl-covariates, which also explains their epidemiological relevance in the context of malaria transmission.
+
+| Covariate | Source | Processing | Relevance |
+|------------------|------------------|------------------|------------------|
+| Precipitation | CHIRPS Daily | Annual mean (mm · day⁻¹) | Determines suitability of breeding sites for *Anopheles* mosquitoes. |
+| Land-surface temperature | MODIS MOD11A2 | Kelvin converted to °C; annual mean | Affects mosquito survival and parasite development rates. |
+| NDVI | MODIS MOD13A2 | Scaled to 0–1; annual mean | Proxy for habitat moisture and vegetation cover. |
+| Elevation | SRTM DEM | 90 m; clipped to country boundary | Integrates climatic variation; highlands tend to have lower transmission. |
+| Relative humidity | ERA5-Land | Derived from temperature and dew-point; annual mean (%) | High humidity increases mosquito survival. |
+| Urbanicity (built-up areas) | MODIS MCD12Q1 | Binary indicator (class 13 = urban) | Urban areas generally have lower risk due to infrastructure and fewer breeding sites. |
+
+: Environmental covariates extracted from Google Earth Engine and their relevance for malaria risk modelling. {#tbl-covariates}
+
+We point out that in order to compute relative humidity, we first extract hourly estimates of air temperature and dew-point temperature at 2 meters above ground level from the ERA5-Land reanalysis product. These two quantities are then combined using a standard empirical formula derived from the Clausius–Clapeyron relation: $$
+\text{RH} = 100 \times \left( \frac{e^{\frac{17.625 \cdot T_d}{243.04 + T_d}}}{e^{\frac{17.625 \cdot T}{243.04 + T}}} \right)
+$$ where $T_d$ is the dew-point temperature and $T$ is the air temperature, both in degrees Celsius. This yields the mean annual relative humidity over the target region, expressed as a percentage.
+
+@tbl-covariates does not provide an exhaustive list of covariates, and other factors such as soil moisture, land surface water, nighttime temperature, or socio-economic indicators like night-time light intensity and land surface emissivity, which may serve as proxies for human activity, infrastructure, or economic development, could also influence malaria risk. However, to maintain this illustrative analysis simpler, we restrict our attention to a core set of covariates that capture key climatic, ecological, and anthropogenic drivers.
+
+In the code below, all layers are clipped to the boundary of Malawi and combined into a single multi-band image, ready to be extracted at survey point locations for subsequent modeling.
+
+```{r, eval=FALSE}
+# -------------------------------
+# STEP 2: Covariates from Earth Engine
+# -------------------------------
+scale_m <- 1000
+
+# Precipitation
+precip <- ee$ImageCollection("UCSB-CHG/CHIRPS/DAILY")$
+  filterDate("2006-01-01", "2006-12-31")$
+  mean()$rename("precip")$clip(mlw_admin0_ee)$toFloat()
+
+# Temperature
+lst <- ee$ImageCollection("MODIS/061/MOD11A2")$
+  filterDate("2006-01-01", "2006-12-31")$
+  select("LST_Day_1km")$mean()$
+  multiply(0.02)$subtract(273.15)$rename("lst_c")$
+  clip(mlw_admin0_ee)$toFloat()
+
+# NDVI
+ndvi <- ee$ImageCollection("MODIS/061/MOD13A2")$
+  filterDate("2006-01-01", "2006-12-31")$
+  select("NDVI")$mean()$
+  multiply(0.0001)$rename("ndvi")$
+  clip(mlw_admin0_ee)$toFloat()
+
+# Elevation
+elev <- ee$Image("USGS/SRTMGL1_003")$
+  rename("elev")$clip(mlw_admin0_ee)$toFloat()
+
+# Humidity from ERA5 (computed from dewpoint and temperature)
+era5 <- ee$ImageCollection("ECMWF/ERA5_LAND/HOURLY")$
+  filterDate("2006-01-01", "2006-12-31")$
+  select(c("dewpoint_temperature_2m", "temperature_2m"))$
+  mean()$clip(mlw_admin0_ee)
+
+td <- era5$select("dewpoint_temperature_2m")$subtract(273.15)
+t <- era5$select("temperature_2m")$subtract(273.15)
+
+rh <- td$expression(
+  "100 * (exp((17.625 * TD)/(243.04 + TD)) / exp((17.625 * T)/(243.04 + T)))",
+  list(TD = td, T = t)
+)$rename("humidity")$toFloat()
+
+# Use MODIS Land Cover, version 061
+urban_raw <- ee$ImageCollection("MODIS/061/MCD12Q1")$
+  filterDate("2006-01-01", "2006-12-31")$
+  first()$select("LC_Type1")$clip(mlw_admin0_ee)
+
+# Urban areas are class 13 in IGBP classification
+built_up <- urban_raw$eq(13)$rename("built_up")$toFloat()
+
+
+
+# Combine all covariates
+covariates <- precip$
+  addBands(lst)$
+  addBands(ndvi)$
+  addBands(elev)$
+  addBands(rh)$
+  addBands(built_up)
+```
+
+After defining the multi-band raster image `covariates` in Google Earth Engine, we download it as a GeoTIFF file using the `ee_as_rast()` function from the `rgee` package. The file is saved temporarily and clipped to the bounding box of Malawi. We then read the raster into R using the `terra`.
+
+```{r, eval=FALSE}
+# -------------------------------
+# STEP 3: Download Earth Engine raster
+# -------------------------------
+out_file <- file.path(tempdir(), "malawi_covariates_2006.tif")
+region <- mlw_admin0_ee$geometry()$bounds()
+
+rgee::ee_as_rast(
+  image = covariates,
+  region = region,
+  scale = scale_m,
+  dsn = out_file,
+  via = "drive"
+)
+
+# Load raster
+r_covs <- rast(out_file)
+
+# -------------------------------
+# STEP 4: Extract covariates at survey locations
+# -------------------------------
+vals <- terra::extract(r_covs, vect(mlw_sf))
+mlw_sf <- bind_cols(mlw_sf, vals[, -1])  # remove ID column
+```
+
+The following code generates six raster maps, one for each covariate, using ggplot2. We first convert the raster stack to a data frame and then create a separate ggplot object for each variable, ensuring a consistent and clean visual style across all maps. The plots in @fig-covariates-map are arranged in a 2 × 3 grid using the base grid package.
+
+```{r}
+#| label: fig-covariates-map
+#| fig-cap: "Raster maps of environmental covariates extracted from Google Earth Engine for Malawi in 2006. Each panel shows one covariate: precipitation, land surface temperature (LST), vegetation cover (NDVI), elevation, relative humidity, and urbanicity. These layers are used as predictors in the geostatistical modelling of malaria prevalence."
+#| fig-align: center
+
+# 1. Prepare a data frame
+
+r_df <- as.data.frame(r_covs, xy = TRUE, na.rm = TRUE)
+
+# Rename layers for clarity
+names(r_df) <- c("x", "y",
+                 "Precipitation",          
+                 "Temperature",            
+                 "NDVI",                   
+                 "Elevation",              
+                 "Humidity",               
+                 "Urbanicity")             
+
+# Urbanicity as a factor for a discrete palette
+r_df$Urbanicity <- factor(r_df$Urbanicity,
+                          levels = c(0, 1),
+                          labels = c("Rural", "Urban"))
+
+# 2. Build one map per covariate, each with its own colour scale 
+p_precip <- ggplot(r_df, aes(x, y, fill = Precipitation)) +
+  geom_raster() +
+  scale_fill_gradient(name = "mm", low = "lightblue", high = "darkblue") +
+  coord_equal() + theme_void() + ggtitle("Precipitation")
+
+p_temp <- ggplot(r_df, aes(x, y, fill = Temperature)) +
+  geom_raster() +
+  scale_fill_gradient(name = "°C", low = "lemonchiffon", high = "red3") +
+  coord_equal() + theme_void() + ggtitle("LST")
+
+p_ndvi <- ggplot(r_df, aes(x, y, fill = NDVI)) +
+  geom_raster() +
+  scale_fill_gradient(name = " ", low = "cornsilk", high = "darkgreen") +
+  coord_equal() + theme_void() + ggtitle("NDVI")
+
+p_elev <- ggplot(r_df, aes(x, y, fill = Elevation)) +
+  geom_raster() +
+  scale_fill_gradient(name = "m", low = "grey90", high = "sienna4") +
+  coord_equal() + theme_void() + ggtitle("Elevation")
+
+p_humid <- ggplot(r_df, aes(x, y, fill = Humidity)) +
+  geom_raster() +
+  scale_fill_gradient(name = "%", low = "white", high = "darkcyan") +
+  coord_equal() + theme_void() + ggtitle("Humidity")
+
+p_urban <- ggplot(r_df, aes(x, y, fill = Urbanicity)) +
+  geom_raster() +
+  scale_fill_manual(values = c("lightgrey", "black"),
+                    name = " ") +
+  coord_equal() + theme_void() + ggtitle("Urban vs Rural")
+
+# 3. Arrange the six plots in a 2 × 3 grid using base 'grid'
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 3)))
+vplayout <- function(row, col)
+  viewport(layout.pos.row = row, layout.pos.col = col)
+
+print(p_precip, vp = vplayout(1, 1))
+print(p_temp,   vp = vplayout(1, 2))
+print(p_ndvi,   vp = vplayout(1, 3))
+print(p_elev,   vp = vplayout(2, 1))
+print(p_humid,  vp = vplayout(2, 2))
+print(p_urban,  vp = vplayout(2, 3))
+```
+
+### Exploratory analysis
+
+To investigate how *Plasmodium falciparum* prevalence varies with environmental conditions, we begin by computing the empirical logit transformation of the observed prevalence at each survey location. Each covariate is then explored in relation to the empirical logit using scatterplots. For continuous covariates, we produce scatter plots with two fitted curves: a LOESS smoother shown in red, and a linear spline model with a single change point shown in blue. The LOESS curve serves as a flexible, nonparametric reference for assessing the general trend in the data. The spline model provides a simple parametric approximation to this trend, with the change point selected based on visual inspection of where the LOESS curve departs from linearity.
+
+```{r,collapse=TRUE}
+#| label: fig-elogit-vs-covariates
+#| fig-cap: "Exploratory plots showing the relationship between the empirical logit of *P. falciparum* prevalence and the chosen environmental covariates. Scatter plots show continuous covariates with LOESS (red) and linear spline (blue) fits. A boxplot is used for the binary urbanicity variable. Change points for splines are based on graphical inspection of the LOESS fitted relationship."
+#| fig-align: center
+
+
+# 1. Prepare data
+mlw_sf <- mlw_sf %>%
+  mutate(
+    elogit = log((positive + 0.5) / (examined - positive + 0.5)),
+    `Precipitation` = precip,
+    `Temperature (°C)` = lst_c,
+    `NDVI` = ndvi,
+    `Elevation (m)` = elev,
+    `Humidity (%)` = humidity,
+    `Urbanicity` = factor(built_up, levels = c(0, 1), labels = c("Rural", "Urban"))
+  )
+
+# 2. Drop geometry and reshape
+plot_data_cont <- mlw_sf %>%
+  select(elogit, `Precipitation`, `Temperature (°C)`, `NDVI`, `Elevation (m)`, `Humidity (%)`) %>%
+  st_drop_geometry() %>%
+  pivot_longer(cols = -elogit, names_to = "Covariate", values_to = "Value")
+
+plot_data_cat <- mlw_sf %>%
+  select(elogit, Urbanicity) %>%
+  st_drop_geometry()
+
+# 3. Define change points
+knots <- c(
+  "Precipitation" = Inf,
+  "Temperature (°C)" = 33,
+  "NDVI" = Inf,
+  "Elevation (m)" = 400,
+  "Humidity (%)" = 65
+)
+
+# 4. Create individual continuous plots
+plots <- lapply(split(plot_data_cont, plot_data_cont$Covariate), function(df) {
+  var <- unique(df$Covariate)
+  knot <- knots[[var]]
+  
+  df <- df %>%
+    mutate(
+      linear_part = Value,
+      spline_part = pmax(Value - knot, 0)
+    )
+  
+  ggplot(df, aes(x = Value, y = elogit)) +
+    geom_point(alpha = 0.5, size = 1) +
+    geom_smooth(method = "loess", se = FALSE, color = "red", linewidth = 1) +
+    geom_smooth(method = "lm",
+                formula = y ~ x + pmax(x - knot, 0),
+                se = FALSE, color = "blue", linewidth = 1) +
+    labs(x = var, y = NULL) +
+    theme_minimal()
+})
+
+# 5. Add Urbanicity boxplot
+p_urban <- ggplot(plot_data_cat, aes(x = Urbanicity, y = elogit)) +
+  geom_boxplot(outlier.size = 0.5) +
+  labs(x = "Urbanicity", y = NULL) +
+  theme_minimal()
+
+# 6. Assemble 2 x 3 plot grid
+final_plot <- (plots[[1]] | plots[[2]] | plots[[3]]) /
+  (plots[[4]] | plots[[5]] | p_urban) +
+  plot_annotation(title = "Empirical logit of prevalence vs environmental covariates")
+
+final_plot
+
+```
+
+@fig-elogit-vs-covariates shows the results of this exploratory approach for the relationship between prevalence and covariates. For some variables, such as temperature, elevation, and humidity, there is a clear nonlinear association that is reasonably captured by a single change point. For others, including precipitation and NDVI, the relationship appears approximately linear, and for this reason no change point is used in the spline fit.
+
+Urbanicity is treated separately as a binary covariate and visualized with a boxplot comparing the empirical logit of prevalence between rural and urban settings. The boxplot indicates that, as we expect, the level of prevalence in urban areas is considerable lower than in rural areas.
+
+To assess the degree of correlation between covariates, we compute the pairwise Pearson correlation coefficients among the continuous environmental variables.
+
+```{r}
+#| label: fig-correlation-heatmap
+#| fig-cap: "Pairwise Pearson correlation matrix between continuous environmental covariates."
+#| fig-align: center
+
+library(ggcorrplot)
+
+# Select continuous covariates only
+cont_vars <- mlw_sf %>%
+  st_drop_geometry() %>%
+  select(Precipitation = precip,
+         Temperature = lst_c,
+         NDVI = ndvi,
+         Elevation = elev,
+         Humidity = humidity)
+
+# Compute correlation matrix
+corr_mat <- cor(cont_vars, use = "complete.obs")
+
+# Plot correlation matrix
+ggcorrplot(corr_mat,
+           method = "circle",
+           type = "lower",
+           lab = TRUE,
+           lab_size = 3,
+           colors = c("blue", "white", "red"),
+           title = "Correlation between covariates",
+           ggtheme = theme_minimal())
+```
+
+The correlations, shown in Figure @fig-correlation-heatmap, are generally moderate in magnitude, ranging from –0.66 between temperature and precipitation to 0.54 between elevation and relative humidity. These values indicate that collinearity is not a major concern in our model development. Each covariate is likely to provide complementary information about malaria risk, and the absence of strong dependencies also supports the reliability of the scatterplots used to explore their individual relationships with prevalence.
+
+We also perform a principal component analysis (PCA) on the standardized continuous environmental covariates to assess the potential for reducing dimensionality in our model. The code below shows the implementation of the PCA.
+
+```{r}
+#| label: fig-pca-scree
+#| fig-cap: "Proportion of variance explained by the principal components computed from standardized continuous environmental covariates."
+#| fig-align: center
+
+library(factoextra)
+
+# Prepare only continuous covariates and standardize
+pca_data <- mlw_sf %>%
+  st_drop_geometry() %>%
+  select(Precipitation = precip,
+         Temperature = lst_c,
+         NDVI = ndvi,
+         Elevation = elev,
+         Humidity = humidity) %>%
+  scale()
+
+# Perform PCA
+pca_result <- prcomp(pca_data)
+
+# Scree plot
+fviz_eig(pca_result, addlabels = TRUE, barfill = "steelblue", barcolor = "grey30") +
+  theme_minimal()
+```
+
+The scree plot in Figure @fig-pca-scree shows the proportion of variance explained by each principal component. The first principal component (PC1) explains approximately 50% of the total variation, suggesting it captures a substantial environmental gradient across the study region. Although additional components may carry useful information, PC1 stands out as a potential candidate for use in model building as a composite environmental index and spatial predictor of malaria prevalence.
+
+```{r}
+#| label: tbl-pca-loadings
+#| tbl-cap: "Loadings of the first two principal components. Each value indicates the contribution of a standardized covariate to the corresponding component."
+#| echo: false
+
+loadings_df <- data.frame(
+  Covariate = c("Precipitation", "Temperature", "NDVI", "Elevation", "Humidity"),
+  PC1 = c(-0.480, 0.596, -0.338, -0.391, -0.385),
+  PC2 = c(-0.339, 0.043, -0.605, 0.560, 0.451)
+)
+
+knitr::kable(loadings_df, align = "lcc")
+
+```
+
+Table @tbl-pca-loadings displays the loadings of the first two principal components. The sign and magnitude of each loading reflect how much each standardized covariate contributes to the corresponding component. PC1 shows strong positive loading for temperature and strong negative loadings for precipitation, humidity, and elevation. This suggests that PC1 represents a gradient from cool, humid, high-elevation areas with more rainfall to hotter, drier lowland regions. NDVI also contributes negatively, implying more vegetation cover in cooler, wetter zones. We can thus interpret PC1 as a general heat-aridity gradient, which well aligns with known ecological drivers of malaria risk.
+
+```{r}
+#| label: fig-pca1-map-scatter
+#| fig-cap: "Left: Spatial distribution of the first principal component (PC1). Right: Empirical logit of malaria prevalence plotted against PC1 with LOESS (red) and linear spline (blue) fits."
+#| fig-align: center
+
+# Create raster for PC1
+r_stack_std <- scale(r_covs[[c("precip", "lst_c", "ndvi", "elev", "humidity")]])
+pc1_weights <- c(-0.480, 0.596, -0.338, -0.391, -0.385)
+pc1_rast <- sum(r_stack_std * pc1_weights)
+names(pc1_rast) <- "PC1"
+
+# Extract PC1 values
+pc1_vals <- terra::extract(pc1_rast, vect(mlw_sf))
+mlw_sf$PC1 <- pc1_vals[, 2]
+
+# Convert raster to df for ggplot
+pc1_df <- as.data.frame(pc1_rast, xy = TRUE, na.rm = TRUE)
+names(pc1_df) <- c("x", "y", "PC1")
+
+# --- Create PC1 map plot ---
+p_map <- ggplot(pc1_df, aes(x = x, y = y, fill = PC1)) +
+  geom_raster() +
+  scale_fill_viridis_c(option = "C") +
+  coord_equal() +
+  theme_void() +
+  ggtitle("PC1: Environmental Gradient")
+
+# --- Create scatterplot with LOESS and spline ---
+knot_pc1 <- 0.75
+scatter_df <- mlw_sf %>%
+  mutate(spline_part = pmax(PC1 - knot_pc1, 0))
+
+p_scatter <- ggplot(scatter_df, aes(x = PC1, y = elogit)) +
+  geom_point(alpha = 0.5, size = 1) +
+  geom_smooth(method = "loess", se = FALSE, color = "red", linewidth = 1) +
+  geom_smooth(method = "lm", formula = y ~ x + pmax(x - knot_pc1, 0),
+              se = FALSE, color = "blue", linewidth = 1) +
+  theme_minimal() +
+  labs(x = "PC1", y = "Empirical logit") +
+  ggtitle("Empirical logit vs PC1")
+
+# --- Combine using patchwork ---
+# Also add some margin space
+p_map <- p_map + theme(plot.margin = margin(r = 20))
+p_scatter <- p_scatter + theme(plot.margin = margin(l = 20))
+p_map + p_scatter
+
+```
+
+@fig-pca1-map-scatter displays the map of PC1 alongside its relationship with malaria prevalence. As done previously, to aid interpretation, we fit a LOESS curve (red) to visualise the general trend, and a linear spline (blue) with a change point at 0.75 to capture a simplified parametric relationship. The spline fit suggests a nonlinear association: malaria risk increases with PC1 up to around 0.75, after which it begins to decline. This pattern implies that malaria prevalence is highest in areas with intermediate PC1 values, i.e. environments that are neither too cold and wet nor too hot and arid. In other words, there appears to be an optimal range of environmental conditions, as summarised by PC1, that are most conducive to malaria transmission. Beyond this range, particularly in more heat-arid regions, the risk may decline due to ecological constraints on mosquito survival or parasite development.
+
+In the next section, we compare two modelling approaches. The first model includes the original environmental covariates using the linear spline specifications identified during our exploratory analysis. The second model replaces these covariates with PC1 alone, treating it as a composite spatial predictor that summarises the dominant environmental gradient in the study area. In both models, we include urbanicity as a separate fixed effect. Urbanicity is excluded from the PCA because it is a binary variable and highly unbalanced, with most survey locations classified as rural. Modelling it separately ensures that its distinct contribution to malaria risk, more linked to infrastructure, housing conditions, and land use, is properly accounted for.
+
+### Model fitting and spatial prediction
+
+In this section, we fit two geostatistical models to malaria prevalence data from Malawi, comparing the effects of using separate environmental covariates versus summarizing them into a principal component.
+
+The first model (`mod_all_cov`) includes all environmental covariates as separate predictors. Namely these are precipitation $d_{\text{prec}}(x)$, NDVI $d_{\text{ndvi}}(x)$, temperature $d_{\text{temp}}(x)$, elevation $d_{\text{elev}}(x)$, humidity $d_{\text{hum}}(x)$, and urbanicity $d_{\text{urb}}(x)$. Following from the results of the exploratory analysis, nonlinear effects for temperature, elevation, and humidity are modeled using linear splines with thresholds at 33°C, 400 m, and 65%, respectively. The logit-linear model is:
+
+$$
+\begin{aligned}
+\log\left\{\frac{p(x)}{1 - p(x)}\right\} =\; & 
+\beta_0 + 
+\beta_1 d_{\text{prec}}(x) +
+\beta_2 d_{\text{ndvi}}(x) +
+\beta_3 d_{\text{temp}}(x) + \beta_4 \max\{d_{\text{temp}}(x) - 33,\; 0\} \\\\
+& +
+\beta_5 d_{\text{elev}}(x) + \beta_6 \max\{d_{\text{elev}}(x) - 400,\; 0\} \\\\
+& +
+\beta_7 d_{\text{hum}}(x) + \beta_8 \max\{d_{\text{hum}}(x) - 65,\; 0\} \\\\
+& +
+\beta_9 d_{\text{urb}}(x) + S(x)
+\end{aligned}
+$$.
+
+
+The second model (`mod_pca`) replaces the continuous covariates with their first principal component $\text{PC}_1(x)$, allowing for a spline above 0.75. The model becomes:
+
+$$
+\log\left\{\frac{p(x)}{1-p(x)}\right\} = \beta_0 + 
+\beta_1 \text{PC}_1(x) + 
+\beta_2 \max\{\text{PC}_1(x) - 0.75,0\} +
+\beta_3 d_{\text{urb}}(x) + S(x)
+$$
+
+This formulation allows us to assess whether the dimensionality reduction via PCA retains the essential variation in environmental risk while simplifying the model structure.
+
+
+```{r, eval=FALSE}
+# Model with all the covariates as separate predictors
+mod_all_cov <-
+glgpm(positive ~
+    precip +
+    ndvi +
+    lst_c + pmax(lst_c - 33, 0) +
+    elev + pmax(elev - 400, 0) +
+    humidity + pmax(humidity - 65, 0) +
+    built_up + gp(),
+    den = examined,
+    data = mlw_sf,
+    family = "binomial")
+
+# Model with all the covariates (except `built_up`)
+# combined into PC1 which is then used as predictor
+mod_pca <-
+  glgpm(positive ~
+          PC1 + pmax(PC1 - 0.75, 0) +
+          built_up + gp(),
+        den = examined,
+        data = mlw_sf,
+        family = "binomial")
+```
+
+```{r}
+summary(mod_all_cov)
+summary(mod_pca)
+```
+
+```{r, eval=FALSE}
+# Create a 5 by 5 regular grid 
+grid_mlw <- create_grid(mlw_admin0_sf, spat_res = 5)
+
+# Extract the covariates over the grid
+r_covs <- terra::project(r_covs, paste0("epsg:",mlw_crs))
+pc1_rast <- terra::project(pc1_rast, paste0("epsg:",mlw_crs))
+
+predictors <- cbind(terra::extract(r_covs,  st_coordinates(grid_mlw)),
+                    terra::extract(pc1_rast,  st_coordinates(grid_mlw)))
+
+# Prevalence prediction over the grid for the two fitted models 
+pred_all_cov <- pred_over_grid(mod_all_cov,
+                               grid_pred = grid_mlw,
+                               predictors = predictors)
+
+pred_pca <- pred_over_grid(mod_pca,
+                           grid_pred = grid_mlw,
+                           predictors = predictors)
+
+pred_all_cov_prev <- pred_target_grid(pred_all_cov,
+                                      f_target = list(prev = function(x) exp(x)/(1+exp(x))))
+
+pred_pca_prev <- pred_target_grid(pred_pca,
+                             f_target = list(prev = function(x) exp(x)/(1+exp(x))))
+
+```
+
+```{r}
+#| label: fig-pred_models
+#| fig-cap: "Predictive mean of prevalence obtained from geostatistical models using all covariates ('all_cov') versus the first principal component ('pca') of the standardized continuous environmental variables."
+#| fig-align: center
+
+
+par(mfrow = c(1,2))
+plot(pred_all_cov_prev, which_target = "prev", which_summary = "mean",
+     main = "Model: 'all_cov'", range = c(0,1))
+plot(pred_pca_prev, which_target = "prev", which_summary = "mean",
+     main = "Model: 'pca'", range = c(0,1))
+
+```
+
+### Comparison of the predictive performance between models
+
+```{r, eval=FALSE}
+assess_pred_mlw <-
+assess_pp(list(all_cov = mod_all_cov,
+               pca = mod_pca),
+          method = "cluster",
+          iter = 1,
+          fold = 3)
+```
+```{r, echo=FALSE, out.width="80%"}
+#| label: fig-mlw-tests
+#| fig-cap: "Geographic distribution of sampled locations in Malawi, coloured by their assignment to one of three cross-validation test sets."
+knitr::include_graphics("figures/mlw_tests.png")
+```
+
+```{r, fig.width=7, fig.height=5}
+#| label: fig-pit-mlw
+#| fig-cap: "Plot of the average non-randomized probability integral transform (AnPIT) function to assess the calibration of the two geostatistical models ('all_cov' and 'pca') for the malaria prevalence data from Malawi."
+plot_AnPIT(assess_pred_mlw, mode = "all")
+
+summary(assess_pred_mlw)
+```
+
+### Summary and conclusions
 
 ## Mapping mosquitoes abundance in Cameroon
+
+## Exercises
+
+1. In the Malawi prevalence mapping analysis, we used the first principal component (PC1) of the environmental covariates to summarize covariate variation and reduce dimensionality. In this exercise, you will investigate whether including the second principal component (PC2) improves the model.
+
+    - Compute the second principal component (PC2) from the same set of standardized covariates used to derive PC1. What is the interpretation of PC2? What kind of relationship does PC2 show with the empirical logit?
+
+    - Fit a geostatistical model that includes both PC1 and PC2 as covariates. How do the covariance parameters of the spatial process change after including PC2 compared to the model with PC1 only?
+
+    - Compare this model to:
+        - the model using only PC1, and
+        - the model using all covariates as separate predictors.  
+      
+      Use the AnPIT plot and CRPS/SCRPS scores to assess predictive performance.
+
+    - Discuss whether adding PC2 captures additional meaningful variation or introduces multicollinearity or overfitting. What implications does this have for model interpretability and parsimony?
+
+
+2. In this exercise, you will repeat the full analysis pipeline developed for Malawi using data from a different country.
+
+    - Choose a different country available in the `malariaAtlas` package (e.g., Zambia or Nigeria), and download parasite prevalence survey data for a specific year.
+
+    - Obtain the same set of environmental covariates used in the Malawi analysis, and prepare them for analysis (e.g., resample, standardize, and extract values at survey locations).
+
+    - Fit and compare two geostatistical models:
+        - A model using the environmental covariates as separate fixed effects.
+        - A model using the first principal component (PC1) as a synthetic covariate summarizing the covariate space.
+
+    - Evaluate model performance using the AnPIT plot and CRPS/SCRPS scores.
+
+    - Reflect on which model performs better in this new setting. Do your conclusions align with what was observed in the Malawi case study? What might explain any differences in performance across countries?

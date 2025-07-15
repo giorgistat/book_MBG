@@ -117,11 +117,11 @@ In this example, we retrieve elevation data for Liberia using the [SRTM 90m data
 This example assumes you have already completed `rgee` setup and authenticated using `ee_Initialize()`.
 :::
 
-```{r}
-#| label: rgee-setup
-#| include: false
-reticulate::use_condaenv("rgee-env", required = TRUE)
-```
+# ```{r}
+# #| label: rgee-setup
+# #| include: false
+# reticulate::use_condaenv("rgee-env", required = TRUE)
+# ```
 
 
 ```{r}
@@ -294,20 +294,20 @@ crs(lbr_pop_100, proj = TRUE, describe = TRUE)
 
 #### Reprojecting spatial data to a common CRS
 
-If your datasets have different CRSs or if you want to change CRS (e.g. from geographical to projected) you will need to reproject one or more datasets so they can be spatially aligned. This ensures that they can be overlaid and analyzed together. For vector data, `st_transform()` reprojects the data into a specified CRS. This example transforms the liberia point data from WGS84 into UTM. To know what's the correct UTM zone and hence EPSG code for Liberia we can use the `get_epsg_utm` function from the `RiskMap` package.
+If your datasets have different CRSs or if you want to change CRS (e.g. from geographical to projected) you will need to reproject one or more datasets so they can be spatially aligned. This ensures that they can be overlaid and analyzed together. For vector data, `st_transform()` reprojects the data into a specified CRS. This example transforms the liberia point data from WGS84 into UTM. To know what's the correct UTM zone and hence EPSG code for Liberia we can use the `propose_utm` function from the `RiskMap` package.
 
 ```{r}
 #| label: st-transform
 # Obtain EPSG code for UTM for Liberia
-get_epsg_utm(liberia_sf)
+propose_utm(liberia_sf)
 
 # Reproject the vector data 
-liberia_sf_utm <- st_transform(liberia_sf, crs = get_epsg_utm(liberia_sf))
+liberia_sf_utm <- st_transform(liberia_sf, crs = propose_utm(liberia_sf))
 ```
 
 Reprojecting raster data is more complex than reprojecting vector data due to the continuous nature of raster grids. The process involves recalculating cell values to fit a new grid based on the new CRS, which can lead to challenges like resampling, distortion, and data loss. When reprojecting a raster, the grid must adjust to the new CRS, often requiring resampling of cell values. The method you choose depends on the data type: **nearest neighbor** is best for categorical data like land use while **bilinear or cubic interpolation** is good for continuous data like temperature, where smooth transitions are needed.
 
-The function `project()` from the `terra` package can be used to reproject a raster.
+The function `project()` from the `terra` package can be used to project a raster.
 
 ```{r}
 #| label: raster-project
@@ -402,7 +402,7 @@ A predictive grid is a regularly spaced set of points or cells that spans the st
 # First we convert the Liberia boundaries to the UTM CRS
 # because we want our grid in meters
 liberia_admin0_utm <- liberia_admin0 |> 
-  st_transform(crs = get_epsg_utm(liberia_sf))
+  st_transform(crs = propose_utm(liberia_sf))
 
 # Generate prediction grid at 5km resolution
 pred_locations <- st_make_grid(liberia_admin0_utm, 

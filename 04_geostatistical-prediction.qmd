@@ -1,6 +1,4 @@
 ---
-filters:
-  - line-highlight
 execute: 
   freeze: auto
 fig-width: 5
@@ -83,7 +81,9 @@ load("./data/fit_malkenya.RData")
 load("./data/pred_age15.RData")
 load("./data/pred_aver_pop.RData")
 load("./data/lb_pred_S_m.RData")
+lb_pred_S_m$obs_loc <- FALSE
 load("./data/lb_pred_S_j.RData")
+lb_pred_S_j$obs_loc <- FALSE
 liberia_grid <- lb_pred_S_j$grid_pred
 load("./data/an_fit.RData")
 load("./data/regularized.RData")
