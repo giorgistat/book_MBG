@@ -10,6 +10,12 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r,echo=FALSE}
+library(wpgpDownloadR)
+lbr_pop_url <- "data/lbr_ppp_2014_1km_Aggregated.tif" 
+
+```
+
 # Handling of spatial data in R {#sec-handling-data}
 
 ## Introduction
@@ -82,7 +88,7 @@ Population density is a key covariate in geostatistical models for public health
 
 Before downloading the data, we will search for available datasets for Liberia. The function `wpgpListCountryDatasets()` helps in retrieving a list of all available datasets for a specified country.
 
-```{r}
+```{r, eval=FALSE}
 #| label: liberia-wpop1
 #| cache: false
 #| message: false
@@ -96,7 +102,7 @@ lbr_datasets <- wpgpListCountryDatasets(ISO3 = "LBR")
 
 We can check the description column to see what datasets are available. Let's download the population data for Liberia for the year 2014 at a 100m resolution. The `wpgpGetCountryDataset` function will then download a raster dataset based on ISO3 code and covariate name.
 
-```{r}
+```{r, eval=FALSE}
 #| label: liberia-wpop2
 #| cache: false
 #| warning: false
@@ -117,11 +123,11 @@ In this example, we retrieve elevation data for Liberia using the [SRTM 90m data
 This example assumes you have already completed `rgee` setup and authenticated using `ee_Initialize()`.
 :::
 
-# ```{r}
-# #| label: rgee-setup
-# #| include: false
-# reticulate::use_condaenv("rgee-env", required = TRUE)
-# ```
+```{r, echo=FALSE,eval=FALSE}
+#| label: rgee-setup
+#| include: false
+reticulate::use_condaenv("rgee-env", required = TRUE)
+```
 
 
 ```{r}

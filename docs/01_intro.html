@@ -90,7 +90,7 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-0de45b8b5f35a93596f1d788d60c4c11.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-51aeb3c3e75aa4fd935c6ef44004bc43.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-b4a315dc253c0adfed1371f8f6efb9a0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -194,6 +194,24 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./02_handling-spatial-data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Handling of spatial data in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03_model-fitting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Model formulation and parameter estimation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04_geostatistical-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Geostatistical prediction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05_case-studies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Case studies</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -356,7 +374,7 @@ Table&nbsp;1.1: List of the R packages that will be used in the book with a desc
 <p>where in place of <code>NAME_OF_THE_DATASET</code> you should type of the name of one of the data-sets listed in <a href="#tbl-data-sets" class="quarto-xref">Table&nbsp;<span>1.2</span></a>.</p>
 <div id="tbl-data-sets" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-data-sets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1.2: List of data-sets available from the <code>RiskMap</code> package. Data-sets listed as “Example” are used throughout the book to illustrate the use of R functions. Data-sets listed as “Case study” are analysed in <span class="quarto-unresolved-ref">?sec-case-studies</span>.
+Table&nbsp;1.2: List of data-sets available from the <code>RiskMap</code> package. Data-sets listed as “Example” are used throughout the book to illustrate the use of R functions. Data-sets listed as “Case study” are analysed in <a href="05_case-studies.html" class="quarto-xref"><span>Chapter 5</span></a>.
 </figcaption><div aria-describedby="tbl-data-sets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
@@ -474,7 +492,7 @@ Figure&nbsp;1.4: Map of the collected number of <em>Anopheles gambiae</em> mosqu
 Figure&nbsp;1.5: Map of the locations of the simulated data-set generated over Italy for a continuous outcome.
 </figcaption></figure>
 </div>
-<p>The data-set reported in <a href="#fig-italy-sim-ch1" class="quarto-xref">Figure&nbsp;<span>1.5</span></a> was generated using a geostatistical model, with the addition of unstructured random effects at provincial and regional level. More details on how this data-set was generated will be provided in <span class="quarto-unresolved-ref">?sec-linear-model</span>. Whilst this data-set does not have any scientific relevance like the other data-sets used in this book, it will serve us to illustrate some of the more advanced features of the package that enable the inclusion of random effects, in addition to the latent Gaussian process that is common to all geostatistical models. The skills you will aquire through the analysis of this data-set will be useful for the analysis of data-sets presented as case studies in <span class="quarto-unresolved-ref">?sec-case-studies</span>.</p>
+<p>The data-set reported in <a href="#fig-italy-sim-ch1" class="quarto-xref">Figure&nbsp;<span>1.5</span></a> was generated using a geostatistical model, with the addition of unstructured random effects at provincial and regional level. More details on how this data-set was generated will be provided in <a href="03_model-fitting.html#sec-linear-model" class="quarto-xref"><span>Section 3.2</span></a>. Whilst this data-set does not have any scientific relevance like the other data-sets used in this book, it will serve us to illustrate some of the more advanced features of the package that enable the inclusion of random effects, in addition to the latent Gaussian process that is common to all geostatistical models. The skills you will aquire through the analysis of this data-set will be useful for the analysis of data-sets presented as case studies in <a href="05_case-studies.html" class="quarto-xref"><span>Chapter 5</span></a>.</p>
 </section></section><section id="sec-geostat-models" class="level2" data-number="1.5"><h2 data-number="1.5" class="anchored" data-anchor-id="sec-geostat-models">
 <span class="header-section-number">1.5</span> Geostatistical problems and geostatistical models</h2>
 <p>What the examples of the previous section have in common is that, in each case, the goal of the statistical analysis is to draw inferences on an unobserved spatially continuous surface using data collected from a finite set of locations. The lead concentration in Galicia, the prevalence for river-blindness in Liberia and the abundance of <em>A. gambiae</em> mosquitoes in Cameroon can all be represented as spatially continuous processes that originate from the combined effects of environmental factors. We denote this class of inferential problems as <em>geostatistical problems</em> for which a solution can be found through the development and application of suitable <em>geostatistical models</em>, which are the subject of this book.</p>
@@ -584,7 +602,7 @@ Figure&nbsp;1.7: Simulated spatial surface using the three correltion functions 
 </div>
 </div>
 </div>
-<p>The flexibility provided by the Matern correlation function in capturing different forms of spatial correlations has made it one of, if not the most widely used correlation function in model-based geostatistics <span class="citation" data-cites="stein1999">(<a href="references.html#ref-stein1999" role="doc-biblioref">Stein 1999</a>)</span>. For this reason, in this book we will consider the Matern correlation function. We will consider estimation issues related to the Matern correlation in <span class="quarto-unresolved-ref">?sec-estimation</span>.</p>
+<p>The flexibility provided by the Matern correlation function in capturing different forms of spatial correlations has made it one of, if not the most widely used correlation function in model-based geostatistics <span class="citation" data-cites="stein1999">(<a href="references.html#ref-stein1999" role="doc-biblioref">Stein 1999</a>)</span>. For this reason, in this book we will consider the Matern correlation function. We will consider estimation issues related to the Matern correlation in <a href="03_model-fitting.html" class="quarto-xref"><span>Chapter 3</span></a>.</p>
 </section></section><section id="workflow-of-a-statistical-analysis-and-structure-of-the-book" class="level2" data-number="1.6"><h2 data-number="1.6" class="anchored" data-anchor-id="workflow-of-a-statistical-analysis-and-structure-of-the-book">
 <span class="header-section-number">1.6</span> Workflow of a statistical analysis and structure of the book</h2>
 <div id="fig-stages" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
@@ -596,11 +614,11 @@ Figure&nbsp;1.8: Stages of a statistical analysis
 </figcaption></figure>
 </div>
 <p><a href="#fig-stages" class="quarto-xref">Figure&nbsp;<span>1.8</span></a> shows the different stages that will follow in carrying the geostatistical analysis of the examples introduced in <a href="#sec-examples-ch1" class="quarto-xref"><span>Section 1.4</span></a>. The exploratory analysis of the data is an essential first step that is used to understand the empirical associations between risk factors and the the health outcome of interest. In our case, this first stage is also used to justify the use of geostatistical models by questioning the underlying assumptions of standard generalized linear models. Based on the results obtained from the exploration of the data, we then formulate a suitable statistical model and estimate its parameters using likelihood based methods of inference. These also allows us to obtain uncertainty measures about the strength of associations of regression relationships and the other model parameters that define the shape of the spatial correlation in the data. Following the estimation of the model, we then proceed to validate its underlying assumptions using suitable diagnostics that assess whether the model can later be sufficiently trusted to represent the observed variation in the modeled outcome. At this stage, if the diagnostics checks yield results that indicate the incompatibility of the model with the data, we go back to the stage of model formulation and address the issues arisen from the validation stage. If instead, we do not find any evidence against the fitted model we can proceed to carry out spatial prediction. At this stage, it is important to define suitable predictive targets that can help us to better answer the original research question and better assist the decision making process. The final step of visualization of uncertainty plays an important role in geostatistical analysis in order to convey the main findings of the study in an effective and easy-to-understand way for a wider audience which also consists of non-experts.</p>
-<p>In the remainder of this book, each chapter focuses on a specific stage as shown in <a href="#fig-stages" class="quarto-xref">Figure&nbsp;<span>1.8</span></a>. We treat visualization of uncertainty together with spatial prediction in <span class="quarto-unresolved-ref">?sec-geo-prediction</span>.</p>
-<p><a href="02_handling-spatial-data.html" class="quarto-xref"><span>Chapter 2</span></a> will provide an overview of how to handle spatial data in R, in particular raster and vector data (both points and polygons). The skills learned in this chapter will be applied throughout the book, and will especially be useful in <span class="quarto-unresolved-ref">?sec-geo-prediction</span> and <span class="quarto-unresolved-ref">?sec-case-studies</span> for generating predictive maps of the modeled outcome.</p>
-<p><span class="quarto-unresolved-ref">?sec-estimation</span> focuses on the model building process and estimation of geostatistical models. This chapter will show how to carry out initial exploratory analyses of the data to inform the formulation of suitable geostatistical models and how these can be fitted using maximum likelihood estimation methods.</p>
-<p><span class="quarto-unresolved-ref">?sec-geo-prediction</span> shows how geostatistical models can be used to carry out spatial prediction of a health outcome of interest both on a spatially continuous and spatially aggregated scales.</p>
-<p>Finally, <span class="quarto-unresolved-ref">?sec-case-studies</span> presents the application of all the methods illustrated in the previous chapters to three additional data-sets. This chapter offers a summary of the content of the book by putting together all the stages in the geostatistical analyses for each of the three case studies, and illustrates additional functionalities of the <code>RiskMap</code> R package not covered in the previous chapters.</p>
+<p>In the remainder of this book, each chapter focuses on a specific stage as shown in <a href="#fig-stages" class="quarto-xref">Figure&nbsp;<span>1.8</span></a>. We treat visualization of uncertainty together with spatial prediction in <a href="04_geostatistical-prediction.html" class="quarto-xref"><span>Chapter 4</span></a>.</p>
+<p><a href="02_handling-spatial-data.html" class="quarto-xref"><span>Chapter 2</span></a> will provide an overview of how to handle spatial data in R, in particular raster and vector data (both points and polygons). The skills learned in this chapter will be applied throughout the book, and will especially be useful in <a href="04_geostatistical-prediction.html" class="quarto-xref"><span>Chapter 4</span></a> and <a href="05_case-studies.html" class="quarto-xref"><span>Chapter 5</span></a> for generating predictive maps of the modeled outcome.</p>
+<p><a href="03_model-fitting.html" class="quarto-xref"><span>Chapter 3</span></a> focuses on the model building process and estimation of geostatistical models. This chapter will show how to carry out initial exploratory analyses of the data to inform the formulation of suitable geostatistical models and how these can be fitted using maximum likelihood estimation methods.</p>
+<p><a href="04_geostatistical-prediction.html" class="quarto-xref"><span>Chapter 4</span></a> shows how geostatistical models can be used to carry out spatial prediction of a health outcome of interest both on a spatially continuous and spatially aggregated scales.</p>
+<p>Finally, <a href="05_case-studies.html" class="quarto-xref"><span>Chapter 5</span></a> presents the application of all the methods illustrated in the previous chapters to three additional data-sets. This chapter offers a summary of the content of the book by putting together all the stages in the geostatistical analyses for each of the three case studies, and illustrates additional functionalities of the <code>RiskMap</code> R package not covered in the previous chapters.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -700,6 +718,9 @@ Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E Raftery. 2007. <span>“Proba
 <div id="ref-gneiting2007jasa" class="csl-entry" role="listitem">
 Gneiting, Tilmann, and Adrian E Raftery. 2007. <span>“Strictly Proper Scoring Rules, Prediction, and Estimation.”</span> <em>Journal of the American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437">https://doi.org/10.1198/016214506000001437</a>.
 </div>
+<div id="ref-harrell2015" class="csl-entry" role="listitem">
+Harrell, Frank E. 2015. <em>Regression Modeling Strategies</em>. 2nd ed. New York: Springer.
+</div>
 <div id="ref-hastie2001" class="csl-entry" role="listitem">
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2001. <em>The Elements of Statistical Learning</em>. Springer Series in Statistics. New York, NY, USA: Springer New York Inc.
 </div>
@@ -720,6 +741,9 @@ Kyomuhangi, Irene, Tarekegn A. Abeku, Matthew J. Kirby, Gezahegn Tesfaye, and Em
 </div>
 <div id="ref-Lovelace2020-iq" class="csl-entry" role="listitem">
 Lovelace, Robin, Jakub Nowosad, and Jannes Muenchow. 2020. <em>Geocomputation with <span>R</span></em>. London, England: CRC Press. <a href="https://r.geocompx.org/">https://r.geocompx.org/</a>.
+</div>
+<div id="ref-malariaAtlas" class="csl-entry" role="listitem">
+Lucas, Tim C. D., Anita K. Nandi, Rosalind E. Howes, Daniel J. Weiss, Ewan Cameron, Nick Golding, and Peter W. Gething. 2020. <span>“malariaAtlas: An r Interface to Global Malariometric Data Hosted by the Malaria Atlas Project.”</span> <em>Wellcome Open Research</em> 5: 74. <a href="https://doi.org/10.12688/wellcomeopenres.15987.1">https://doi.org/10.12688/wellcomeopenres.15987.1</a>.
 </div>
 <div id="ref-mahoney2023" class="csl-entry" role="listitem">
 Mahoney, Michael J, Lucas K Johnson, Julia Silge, Hannah Frick, Max Kuhn, and Colin M Beier. 2023. <span>“Assessing the Performance of Spatial Cross-Validation Approaches for Models of Spatially Structured Data.”</span> <a href="https://doi.org/10.48550/arXiv.2303.07334">https://doi.org/10.48550/arXiv.2303.07334</a>.

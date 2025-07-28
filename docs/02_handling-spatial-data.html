@@ -186,7 +186,7 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05_case-studies.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Remove columns with all NAs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Case studies</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -220,39 +220,34 @@ div.csl-indent {
   </ul>
 </li>
   <li>
-<a href="#r-label-rgee-setup-include-false-reticulateuse_condaenvrgee-env-required-true" id="toc-r-label-rgee-setup-include-false-reticulateuse_condaenvrgee-env-required-true" class="nav-link" data-scroll-target="#r-label-rgee-setup-include-false-reticulateuse_condaenvrgee-env-required-true"><span class="header-section-number">3</span> <code>{r} # #| label: rgee-setup # #| include: false # reticulate::use_condaenv("rgee-env", required = TRUE) #</code></a>
+<a href="#importing-and-standardizing-spatial-data" id="toc-importing-and-standardizing-spatial-data" class="nav-link" data-scroll-target="#importing-and-standardizing-spatial-data"><span class="header-section-number">2.4</span> Importing and standardizing spatial data</a>
   <ul class="collapse">
-<li>
-<a href="#importing-and-standardizing-spatial-data" id="toc-importing-and-standardizing-spatial-data" class="nav-link" data-scroll-target="#importing-and-standardizing-spatial-data"><span class="header-section-number">3.1</span> Importing and standardizing spatial data</a>
-  <ul class="collapse">
-<li><a href="#importing-vector-data" id="toc-importing-vector-data" class="nav-link" data-scroll-target="#importing-vector-data"><span class="header-section-number">3.1.1</span> Importing vector data</a></li>
-  <li><a href="#importing-raster-data" id="toc-importing-raster-data" class="nav-link" data-scroll-target="#importing-raster-data"><span class="header-section-number">3.1.2</span> Importing raster data</a></li>
-  <li><a href="#understanding-coordinate-reference-systems-crs" id="toc-understanding-coordinate-reference-systems-crs" class="nav-link" data-scroll-target="#understanding-coordinate-reference-systems-crs"><span class="header-section-number">3.1.3</span> Understanding coordinate reference systems (CRS)</a></li>
-  <li><a href="#epsg-codes" id="toc-epsg-codes" class="nav-link" data-scroll-target="#epsg-codes"><span class="header-section-number">3.1.4</span> EPSG codes</a></li>
-  <li><a href="#convert-a-data-frame-to-an-sf-object" id="toc-convert-a-data-frame-to-an-sf-object" class="nav-link" data-scroll-target="#convert-a-data-frame-to-an-sf-object"><span class="header-section-number">3.1.5</span> Convert a data frame to an <code>sf</code> object</a></li>
-  <li><a href="#working-with-crss-in-r" id="toc-working-with-crss-in-r" class="nav-link" data-scroll-target="#working-with-crss-in-r"><span class="header-section-number">3.1.6</span> Working with CRSs in R</a></li>
+<li><a href="#importing-vector-data" id="toc-importing-vector-data" class="nav-link" data-scroll-target="#importing-vector-data"><span class="header-section-number">2.4.1</span> Importing vector data</a></li>
+  <li><a href="#importing-raster-data" id="toc-importing-raster-data" class="nav-link" data-scroll-target="#importing-raster-data"><span class="header-section-number">2.4.2</span> Importing raster data</a></li>
+  <li><a href="#understanding-coordinate-reference-systems-crs" id="toc-understanding-coordinate-reference-systems-crs" class="nav-link" data-scroll-target="#understanding-coordinate-reference-systems-crs"><span class="header-section-number">2.4.3</span> Understanding coordinate reference systems (CRS)</a></li>
+  <li><a href="#epsg-codes" id="toc-epsg-codes" class="nav-link" data-scroll-target="#epsg-codes"><span class="header-section-number">2.4.4</span> EPSG codes</a></li>
+  <li><a href="#convert-a-data-frame-to-an-sf-object" id="toc-convert-a-data-frame-to-an-sf-object" class="nav-link" data-scroll-target="#convert-a-data-frame-to-an-sf-object"><span class="header-section-number">2.4.5</span> Convert a data frame to an <code>sf</code> object</a></li>
+  <li><a href="#working-with-crss-in-r" id="toc-working-with-crss-in-r" class="nav-link" data-scroll-target="#working-with-crss-in-r"><span class="header-section-number">2.4.6</span> Working with CRSs in R</a></li>
   </ul>
 </li>
   <li>
-<a href="#extracting-covariate-data" id="toc-extracting-covariate-data" class="nav-link" data-scroll-target="#extracting-covariate-data"><span class="header-section-number">3.2</span> Extracting covariate data</a>
+<a href="#extracting-covariate-data" id="toc-extracting-covariate-data" class="nav-link" data-scroll-target="#extracting-covariate-data"><span class="header-section-number">2.5</span> Extracting covariate data</a>
   <ul class="collapse">
-<li><a href="#extracting-covariates-from-raster-layers" id="toc-extracting-covariates-from-raster-layers" class="nav-link" data-scroll-target="#extracting-covariates-from-raster-layers"><span class="header-section-number">3.2.1</span> Extracting covariates from raster layers</a></li>
+<li><a href="#extracting-covariates-from-raster-layers" id="toc-extracting-covariates-from-raster-layers" class="nav-link" data-scroll-target="#extracting-covariates-from-raster-layers"><span class="header-section-number">2.5.1</span> Extracting covariates from raster layers</a></li>
   </ul>
 </li>
-  <li><a href="#creating-a-predictive-grid" id="toc-creating-a-predictive-grid" class="nav-link" data-scroll-target="#creating-a-predictive-grid"><span class="header-section-number">3.3</span> Creating a predictive grid</a></li>
+  <li><a href="#creating-a-predictive-grid" id="toc-creating-a-predictive-grid" class="nav-link" data-scroll-target="#creating-a-predictive-grid"><span class="header-section-number">2.6</span> Creating a predictive grid</a></li>
   <li>
-<a href="#visualizing-spatial-data" id="toc-visualizing-spatial-data" class="nav-link" data-scroll-target="#visualizing-spatial-data"><span class="header-section-number">3.4</span> Visualizing spatial data</a>
+<a href="#visualizing-spatial-data" id="toc-visualizing-spatial-data" class="nav-link" data-scroll-target="#visualizing-spatial-data"><span class="header-section-number">2.7</span> Visualizing spatial data</a>
   <ul class="collapse">
-<li><a href="#visualizing-point-data" id="toc-visualizing-point-data" class="nav-link" data-scroll-target="#visualizing-point-data"><span class="header-section-number">3.4.1</span> Visualizing point data</a></li>
-  <li><a href="#visualizing-polygon-data" id="toc-visualizing-polygon-data" class="nav-link" data-scroll-target="#visualizing-polygon-data"><span class="header-section-number">3.4.2</span> Visualizing polygon data</a></li>
-  <li><a href="#visualizing-raster-data" id="toc-visualizing-raster-data" class="nav-link" data-scroll-target="#visualizing-raster-data"><span class="header-section-number">3.4.3</span> Visualizing raster data</a></li>
-  <li><a href="#combining-multiple-spatial-data-types" id="toc-combining-multiple-spatial-data-types" class="nav-link" data-scroll-target="#combining-multiple-spatial-data-types"><span class="header-section-number">3.4.4</span> Combining Multiple Spatial Data Types</a></li>
+<li><a href="#visualizing-point-data" id="toc-visualizing-point-data" class="nav-link" data-scroll-target="#visualizing-point-data"><span class="header-section-number">2.7.1</span> Visualizing point data</a></li>
+  <li><a href="#visualizing-polygon-data" id="toc-visualizing-polygon-data" class="nav-link" data-scroll-target="#visualizing-polygon-data"><span class="header-section-number">2.7.2</span> Visualizing polygon data</a></li>
+  <li><a href="#visualizing-raster-data" id="toc-visualizing-raster-data" class="nav-link" data-scroll-target="#visualizing-raster-data"><span class="header-section-number">2.7.3</span> Visualizing raster data</a></li>
+  <li><a href="#combining-multiple-spatial-data-types" id="toc-combining-multiple-spatial-data-types" class="nav-link" data-scroll-target="#combining-multiple-spatial-data-types"><span class="header-section-number">2.7.4</span> Combining Multiple Spatial Data Types</a></li>
   </ul>
 </li>
-  <li><a href="#review-questions" id="toc-review-questions" class="nav-link" data-scroll-target="#review-questions"><span class="header-section-number">3.5</span> Review Questions</a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">3.6</span> Exercises</a></li>
-  </ul>
-</li>
+  <li><a href="#review-questions" id="toc-review-questions" class="nav-link" data-scroll-target="#review-questions"><span class="header-section-number">2.8</span> Review Questions</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">2.9</span> Exercises</a></li>
   </ul></nav>
     </div>
 <!-- main -->
@@ -421,9 +416,6 @@ Note
 <p>This example assumes you have already completed <code>rgee</code> setup and authenticated using <code><a href="https://r-spatial.github.io/rgee/reference/ee_Initialize.html">ee_Initialize()</a></code>.</p>
 </div>
 </div>
-</section></section><section id="r-label-rgee-setup-include-false-reticulateuse_condaenvrgee-env-required-true" class="level1" data-number="3"><h1 data-number="3">
-<span class="header-section-number">3</span> <code>{r} # #| label: rgee-setup # #| include: false # reticulate::use_condaenv("rgee-env", required = TRUE) #</code>
-</h1>
 <div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load required packages</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/rgee/">rgee</a></span><span class="op">)</span>  </span>
@@ -488,16 +480,16 @@ Band Metadata (img_band = elevation):
 <img src="02_handling-spatial-data_files/figure-html/fig-rgee-elevation-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rgee-elevation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.1: Elevation (m) in Liberia retrieved via Google Earth Engine (SRTM).
+Figure&nbsp;2.2: Elevation (m) in Liberia retrieved via Google Earth Engine (SRTM).
 </figcaption></figure>
 </div>
 </div>
 </div>
-<section id="importing-and-standardizing-spatial-data" class="level2" data-number="3.1"><h2 data-number="3.1" class="anchored" data-anchor-id="importing-and-standardizing-spatial-data">
-<span class="header-section-number">3.1</span> Importing and standardizing spatial data</h2>
+</section></section><section id="importing-and-standardizing-spatial-data" class="level2" data-number="2.4"><h2 data-number="2.4" class="anchored" data-anchor-id="importing-and-standardizing-spatial-data">
+<span class="header-section-number">2.4</span> Importing and standardizing spatial data</h2>
 <p>In geostatistical analysis, importing and standardizing spatial data is a critical step to ensure that data from different sources align and can be used effectively. Spatial data, whether it’s vector data (points, lines, polygons) or raster data (grids), can come in various formats and may use different <strong>Coordinate Reference Systems (CRS)</strong>. To perform accurate spatial analyses, it’s essential to import data correctly and ensure consistency in terms of projection and format. This section will cover how to import vector and raster data into R, explain the concept of CRS and sensure that different datasets align properly for subsequent geostatistical analysis.</p>
-<section id="importing-vector-data" class="level3" data-number="3.1.1"><h3 data-number="3.1.1" class="anchored" data-anchor-id="importing-vector-data">
-<span class="header-section-number">3.1.1</span> Importing vector data</h3>
+<section id="importing-vector-data" class="level3" data-number="2.4.1"><h3 data-number="2.4.1" class="anchored" data-anchor-id="importing-vector-data">
+<span class="header-section-number">2.4.1</span> Importing vector data</h3>
 <p>Vector data are typically stored in formats such as <strong>shapefiles</strong> (<code>.shp</code>) or <strong>geopackages</strong> (<code>.gpkg</code>). The <code>sf</code> (simple features) package in R is the most common tool for handling vector data.</p>
 <div class="cell">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the sf package</span></span>
@@ -511,8 +503,8 @@ Figure&nbsp;3.1: Elevation (m) in Liberia retrieved via Google Earth Engine (SRT
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">admin</span><span class="op">)</span>  <span class="co"># Basic plot of the shapefile</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> function reads various spatial data formats, automatically recognizing file types.</p>
-</section><section id="importing-raster-data" class="level3" data-number="3.1.2"><h3 data-number="3.1.2" class="anchored" data-anchor-id="importing-raster-data">
-<span class="header-section-number">3.1.2</span> Importing raster data</h3>
+</section><section id="importing-raster-data" class="level3" data-number="2.4.2"><h3 data-number="2.4.2" class="anchored" data-anchor-id="importing-raster-data">
+<span class="header-section-number">2.4.2</span> Importing raster data</h3>
 <p>Raster data consists of a grid of cells, where each cell holds a value representing a spatial attribute such as elevation or temperature. The <code>terra</code> package in R is designed to work with raster data and has superseded the older <code>raster</code> package due to better performance and greater functionality. Let’s see now how to import a GeoTIFF file using <code>terra</code>. We can upload the population raster for Liberia that we have downloaded in <a href="#sec-pop-data" class="quarto-xref"><span>Section 2.3.2</span></a>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the terra package</span></span>
@@ -543,14 +535,14 @@ max value   : 92.716874581 </code></pre>
 <img src="02_handling-spatial-data_files/figure-html/fig-lbr-pop-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lbr-pop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.2: Liberia population count for 2014 at 100m resolution (log-scale).
+Figure&nbsp;2.3: Liberia population count for 2014 at 100m resolution (log-scale).
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>The output of <code><a href="https://rdrr.io/r/base/print.html">print()</a></code> provides a detailed summary of the raster’s properties. The <code><a href="https://rspatial.github.io/terra/reference/rast.html">rast()</a></code> function reads raster files in formats like GeoTIFF, ASCII grid, or other common raster formats and then we used <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> as a quick way to visualize raster data.</p>
-</section><section id="understanding-coordinate-reference-systems-crs" class="level3" data-number="3.1.3"><h3 data-number="3.1.3" class="anchored" data-anchor-id="understanding-coordinate-reference-systems-crs">
-<span class="header-section-number">3.1.3</span> Understanding coordinate reference systems (CRS)</h3>
+</section><section id="understanding-coordinate-reference-systems-crs" class="level3" data-number="2.4.3"><h3 data-number="2.4.3" class="anchored" data-anchor-id="understanding-coordinate-reference-systems-crs">
+<span class="header-section-number">2.4.3</span> Understanding coordinate reference systems (CRS)</h3>
 <p>When working with spatial data, especially from different sources, one of the most critical tasks is ensuring that all datasets share the same <strong>Coordinate Reference System (CRS)</strong>. A CRS defines how the two-dimensional map data corresponds to locations on the three-dimensional Earth. If different layers (e.g., raster and vector data) have different CRSs, they may not align correctly when plotted or analyzed together, leading to inaccurate analyses or visualizations.</p>
 <p>CRSs can either be:</p>
 <ul>
@@ -558,8 +550,8 @@ Figure&nbsp;3.2: Liberia population count for 2014 at 100m resolution (log-scale
 <li><p><strong>Projected</strong>: These convert the Earth’s curved surface to a flat map and preserve certain properties like area, distance, or direction. Examples include <strong>Universal Transverse Mercator (UTM)</strong> or <strong>Albers Equal Area</strong> projections.</p></li>
 </ul>
 <p>In many cases, using a projected rather than a geographic CRS is preferred, especially when any summary statistic or parameter is distance-related. In a geographic CRS, distances between two points are calculated using angular coordinates (degrees), which do not translate easily into linear units like meters or kilometers. This makes interpreting distances challenging, as the length of a degree of latitude differs from the length of a degree of longitude. In contrast, a projected CRS uses a linear coordinate system (usually meters), ensuring that distances are accurately represented on a flat surface. This is important when computing spatial variograms, covariance functions, or some parameters in geostatistical models, where distance between sampling locations is a key factor. In this context, we assume that the default distance metric is Euclidean distance. However, an important exception to our recommendation arises when analyzing data across large, global-scale regions. In such cases, it is more appropriate to use a geographic CRS along with spherical distances, as these better reflect the curved nature of the Earth’s surface.</p>
-</section><section id="epsg-codes" class="level3" data-number="3.1.4"><h3 data-number="3.1.4" class="anchored" data-anchor-id="epsg-codes">
-<span class="header-section-number">3.1.4</span> EPSG codes</h3>
+</section><section id="epsg-codes" class="level3" data-number="2.4.4"><h3 data-number="2.4.4" class="anchored" data-anchor-id="epsg-codes">
+<span class="header-section-number">2.4.4</span> EPSG codes</h3>
 <p>An <strong>EPSG code</strong> is a unique identifier that defines a CRS. These codes, managed by the <strong>European Petroleum Survey Group (EPSG)</strong>, are widely used in geographic information systems (GIS) to simplify the use of specific projections, ensuring that spatial data is correctly aligned and interpreted. Each EPSG code corresponds to a unique CRS or map projection, making it easier to standardize and manage spatial data from different sources.</p>
 <p>Some key and often used EPSG codes are:</p>
 <ul>
@@ -568,8 +560,8 @@ Figure&nbsp;3.2: Liberia population count for 2014 at 100m resolution (log-scale
 <li><p><strong>EPSG:3857</strong>: This code is for the <strong>Web Mercator projection</strong>, which is widely used for web mapping services, including <strong>Google Maps</strong>, <strong>OpenStreetMap</strong>, and <strong>Bing Maps</strong>. This projected CRS uses meters as the unit of distance and is optimized for visualizing maps on a 2D plane, though it distorts area and distance, especially at high latitudes. It is well-suited for interactive online mapping but not ideal for precise distance-based geostatistical analyses.</p></li>
 </ul>
 <p>For a more in-depth discussion on how to choose an appropriate CRS, we recommend referring to the excellent treatment in <a href="https://r.geocompx.org"><em>Geocomputation with R</em></a> <span class="citation" data-cites="Lovelace2020-iq">(<a href="references.html#ref-Lovelace2020-iq" role="doc-biblioref">Lovelace, Nowosad, and Muenchow 2020</a>)</span>, especially <a href="https://r.geocompx.org/reproj-geo-data#which-crs">Section 7.6: Which CRS?</a>.</p>
-</section><section id="convert-a-data-frame-to-an-sf-object" class="level3" data-number="3.1.5"><h3 data-number="3.1.5" class="anchored" data-anchor-id="convert-a-data-frame-to-an-sf-object">
-<span class="header-section-number">3.1.5</span> Convert a data frame to an <code>sf</code> object</h3>
+</section><section id="convert-a-data-frame-to-an-sf-object" class="level3" data-number="2.4.5"><h3 data-number="2.4.5" class="anchored" data-anchor-id="convert-a-data-frame-to-an-sf-object">
+<span class="header-section-number">2.4.5</span> Convert a data frame to an <code>sf</code> object</h3>
 <p>In geospatial analysis, data is often provided in tabular formats like CSV files that contain spatial coordinates (e.g., latitude and longitude). To use these data effectively in R, it is necessary to convert the data frame into an <code>sf</code> object, which is the standard format for working with spatial data in R. Here we show how to achieve this, we can use the Liberia data available in the <code>RiskMap</code> package as it is a data frame.</p>
 <div class="cell">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the RiskMap package</span></span>
@@ -601,11 +593,11 @@ Figure&nbsp;3.2: Liberia population count for 2014 at 100m resolution (log-scale
 </div>
 </div>
 <p>The <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code> function converts the data frame into an <code>sf</code> object. The <code>coords</code> argument specifies which columns contain the spatial coordinates and the <code>crs</code> argument assigns the CRS that in this case we know being WGS84 (EPSG:4326). The <code>sf</code> object can now be used for operations such as spatial joins, distance calculations, and mapping with other spatial layers. Note that the columns containing the spatial coordinates have been replaced by a <code>geometry</code> column, which now stores this information. If you would like to retain the original coordinate columns in the output, you can set the <code>remove</code> argument to <code>FALSE</code> when converting the data frame to an <code>sf</code> object.</p>
-</section><section id="working-with-crss-in-r" class="level3" data-number="3.1.6"><h3 data-number="3.1.6" class="anchored" data-anchor-id="working-with-crss-in-r">
-<span class="header-section-number">3.1.6</span> Working with CRSs in R</h3>
+</section><section id="working-with-crss-in-r" class="level3" data-number="2.4.6"><h3 data-number="2.4.6" class="anchored" data-anchor-id="working-with-crss-in-r">
+<span class="header-section-number">2.4.6</span> Working with CRSs in R</h3>
 <p>When working with data from multiple sources, such as environmental layers, population data, or administrative boundaries, ensuring that all datasets share the same CRS is essential for accurate spatial analysis. This section covers the core tasks involved in managing CRSs in R: checking the CRS of spatial data to ensure datasets are compatible and reprojecting spatial data into a common CRS when necessary.</p>
-<section id="checking-the-crs-of-spatial-data" class="level4" data-number="3.1.6.1"><h4 data-number="3.1.6.1" class="anchored" data-anchor-id="checking-the-crs-of-spatial-data">
-<span class="header-section-number">3.1.6.1</span> Checking the CRS of Spatial Data</h4>
+<section id="checking-the-crs-of-spatial-data" class="level4" data-number="2.4.6.1"><h4 data-number="2.4.6.1" class="anchored" data-anchor-id="checking-the-crs-of-spatial-data">
+<span class="header-section-number">2.4.6.1</span> Checking the CRS of Spatial Data</h4>
 <p>Before performing any spatial operation, it’s crucial to check the CRS of your spatial datasets. Knowing whether your data uses geographic coordinates (e.g., WGS84) or a projected coordinate system (e.g., UTM) helps ensure that they are aligned and ready for analysis. Both <code>sf</code> and <code>terra</code> provide functions to retrieve and inspect the CRS, ensuring datasets are spatially aligned before analysis. The <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> function retrieves the CRS information for vector data.</p>
 <div class="cell">
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check the CRS of the vector data</span></span>
@@ -654,8 +646,8 @@ GEOGCRS["WGS 84",
 </div>
 </div>
 </div>
-</section><section id="reprojecting-spatial-data-to-a-common-crs" class="level4" data-number="3.1.6.2"><h4 data-number="3.1.6.2" class="anchored" data-anchor-id="reprojecting-spatial-data-to-a-common-crs">
-<span class="header-section-number">3.1.6.2</span> Reprojecting spatial data to a common CRS</h4>
+</section><section id="reprojecting-spatial-data-to-a-common-crs" class="level4" data-number="2.4.6.2"><h4 data-number="2.4.6.2" class="anchored" data-anchor-id="reprojecting-spatial-data-to-a-common-crs">
+<span class="header-section-number">2.4.6.2</span> Reprojecting spatial data to a common CRS</h4>
 <p>If your datasets have different CRSs or if you want to change CRS (e.g.&nbsp;from geographical to projected) you will need to reproject one or more datasets so they can be spatially aligned. This ensures that they can be overlaid and analyzed together. For vector data, <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code> reprojects the data into a specified CRS. This example transforms the liberia point data from WGS84 into UTM. To know what’s the correct UTM zone and hence EPSG code for Liberia we can use the <code>propose_utm</code> function from the <code>RiskMap</code> package.</p>
 <div class="cell">
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Obtain EPSG code for UTM for Liberia</span></span>
@@ -675,11 +667,11 @@ GEOGCRS["WGS 84",
 </div>
 <p>Reprojecting a raster may alter its resolution. For example, reprojecting from geographic (degrees) to projected (meters) CRS can result in a mismatch between the original and new cell sizes. Moreover, distortion can occur when converting between projections, especially at high latitudes. Some cells may be stretched or compressed, leading to potential loss of information or edge artifacts. These distortions arise because the Earth is not flat, and projecting the curved surface of the Earth onto a flat plane (or vice versa) leads to trade-offs. For example, the Mercator projection preserves angles and shapes but distorts area, particularly near the poles.</p>
 <p>For these reasons, it’s often better to reproject vectors rather than rasters when both data types are used together and avoid as much as possible to change the CRS of rasters. One way to achieve this is to work with WGS84 when performing all spatial operations like extraction of covariates from rasters and then transform only the point data to a projected CRS before fitting the model.</p>
-</section></section></section><section id="extracting-covariate-data" class="level2" data-number="3.2"><h2 data-number="3.2" class="anchored" data-anchor-id="extracting-covariate-data">
-<span class="header-section-number">3.2</span> Extracting covariate data</h2>
+</section></section></section><section id="extracting-covariate-data" class="level2" data-number="2.5"><h2 data-number="2.5" class="anchored" data-anchor-id="extracting-covariate-data">
+<span class="header-section-number">2.5</span> Extracting covariate data</h2>
 <p>In geostatistical models, the inclusion of relevant covariates (environmental, demographic, or climatic) can potentially enhance predictive accuracy. Covariate data often come from raster or polygon sources, and extracting these values for point locations is essential to link spatial context to point-referenced data. These covariates could include variables like temperature, elevation, land cover, or population density, which influence the spatial distribution of diseases. In this section, we will cover how to extract covariates at point locations from both polygon and raster layers.</p>
-<section id="extracting-covariates-from-polygon-layers" class="level4" data-number="3.2.0.1"><h4 data-number="3.2.0.1" class="anchored" data-anchor-id="extracting-covariates-from-polygon-layers">
-<span class="header-section-number">3.2.0.1</span> Extracting covariates from polygon layers</h4>
+<section id="extracting-covariates-from-polygon-layers" class="level4" data-number="2.5.0.1"><h4 data-number="2.5.0.1" class="anchored" data-anchor-id="extracting-covariates-from-polygon-layers">
+<span class="header-section-number">2.5.0.1</span> Extracting covariates from polygon layers</h4>
 <p>Polygon layers represent discrete spatial features such as administrative boundaries, land cover categories, or protected areas. These layers typically include associated attributes (e.g.&nbsp;region names, population totals, land type), which can serve as covariates in geostatistical models. A common task in spatial data analysis is to assign attributes from a polygon layer to a set of point-referenced data, for example, determining the administrative region or land use category that each survey location falls within. This is done using a <strong>spatial join</strong>, which overlays the point and polygon layers and attaches the attributes of the enclosing polygon to each point. Below is an example where we assign administrative region names (admin1) to a set of point locations in Liberia:</p>
 <div class="cell">
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Perform a spatial join to transfer polygon attributes to the points</span></span>
@@ -696,8 +688,8 @@ GEOGCRS["WGS 84",
 </div>
 </div>
 <p>This spatial join enriches each point with the corresponding polygon attribute, in this case, the admin1 name (shapeName). These attributes can then be used as categorical covariates in geostatistical models to account for regional variation in disease risk or programmatic coverage.</p>
-</section><section id="extracting-covariates-from-raster-layers" class="level3" data-number="3.2.1"><h3 data-number="3.2.1" class="anchored" data-anchor-id="extracting-covariates-from-raster-layers">
-<span class="header-section-number">3.2.1</span> Extracting covariates from raster layers</h3>
+</section><section id="extracting-covariates-from-raster-layers" class="level3" data-number="2.5.1"><h3 data-number="2.5.1" class="anchored" data-anchor-id="extracting-covariates-from-raster-layers">
+<span class="header-section-number">2.5.1</span> Extracting covariates from raster layers</h3>
 <p>Raster data provides continuous spatial information, such as elevation, climate data, or population density. Covariate values from raster layers can be extracted for specific points using the <strong><code><a href="https://rspatial.github.io/terra/reference/extract.html">extract()</a></code></strong> function from the <code>terra</code> package. Each point will receive the value of the raster cell it overlaps.</p>
 <div class="cell">
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract raster values at the point locations</span></span>
@@ -731,7 +723,7 @@ GEOGCRS["WGS 84",
 <img src="02_handling-spatial-data_files/figure-html/fig-buffer-extract-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-buffer-extract-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.3: Survey locations (red dots) surrounded by a 5 km buffer (dark circles).
+Figure&nbsp;2.4: Survey locations (red dots) surrounded by a 5 km buffer (dark circles).
 </figcaption></figure>
 </div>
 </div>
@@ -758,8 +750,8 @@ Figure&nbsp;3.3: Survey locations (red dots) surrounded by a 5 km buffer (dark c
 </div>
 </div>
 <p>You can modify the <code>fun</code> argument to calculate other summary statistics, such as the sum, min or max of the raster values within the buffer. This approach is particularly useful when the phenomenon being modeled (e.g., disease transmission) is influenced by broader spatial factors around the observation point, rather than just the value at the exact point location.</p>
-</section></section><section id="creating-a-predictive-grid" class="level2" data-number="3.3"><h2 data-number="3.3" class="anchored" data-anchor-id="creating-a-predictive-grid">
-<span class="header-section-number">3.3</span> Creating a predictive grid</h2>
+</section></section><section id="creating-a-predictive-grid" class="level2" data-number="2.6"><h2 data-number="2.6" class="anchored" data-anchor-id="creating-a-predictive-grid">
+<span class="header-section-number">2.6</span> Creating a predictive grid</h2>
 <p>A predictive grid is a regularly spaced set of points or cells that spans the study region. This grid serves as the basis for predictions made by your model. The density of the grid (i.e., the distance between grid points) affects both the resolution of the prediction and the computational cost. For point-based predictions, we can generate a grid of points over a polygon (e.g., administrative boundary) using the <code>sf</code> package and the <code>st_make_grid</code> function.</p>
 <div class="cell">
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># First we convert the Liberia boundaries to the UTM CRS</span></span>
@@ -784,16 +776,16 @@ Figure&nbsp;3.3: Survey locations (red dots) surrounded by a 5 km buffer (dark c
 <img src="02_handling-spatial-data_files/figure-html/fig-pred-grid-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pred-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.4: Prediction grid (5 km spacing) created within the boundaries of Liberia. Points are spaced regularly in UTM coordinates and filtered to remain within the national boundary.
+Figure&nbsp;2.5: Prediction grid (5 km spacing) created within the boundaries of Liberia. Points are spaced regularly in UTM coordinates and filtered to remain within the national boundary.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section><section id="visualizing-spatial-data" class="level2" data-number="3.4"><h2 data-number="3.4" class="anchored" data-anchor-id="visualizing-spatial-data">
-<span class="header-section-number">3.4</span> Visualizing spatial data</h2>
+</section><section id="visualizing-spatial-data" class="level2" data-number="2.7"><h2 data-number="2.7" class="anchored" data-anchor-id="visualizing-spatial-data">
+<span class="header-section-number">2.7</span> Visualizing spatial data</h2>
 <p>Visualization is a key part of spatial data analysis, as it allows you to explore and communicate spatial patterns and relationships effectively. R provides a lot of functionalities to visualize spatial data and create very beautiful maps. Until now we have used basic plotting functions. Here we introduce the <code>ggplot2</code> package that allows to combine different types of geographic data in a map. The <code>ggplot2</code> package in R provides a flexible and powerful framework for creating both simple and complex visualizations, including maps of point data, polygons, and rasters. With the help of extensions like <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster()</a></code>, <code>ggplot2</code> makes it easy to visualize spatial data, whether you’re working with point locations, polygons, or continuous raster data.</p>
-<section id="visualizing-point-data" class="level3" data-number="3.4.1"><h3 data-number="3.4.1" class="anchored" data-anchor-id="visualizing-point-data">
-<span class="header-section-number">3.4.1</span> Visualizing point data</h3>
+<section id="visualizing-point-data" class="level3" data-number="2.7.1"><h3 data-number="2.7.1" class="anchored" data-anchor-id="visualizing-point-data">
+<span class="header-section-number">2.7.1</span> Visualizing point data</h3>
 <p>Point data often represents the locations of observations (e.g., disease cases, sampling sites). <code>ggplot2</code> allows you to plot these points and optionally color them by a covariate (e.g., disease prevalence or population density). Here is an example that uses the Liberia data.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load necessary libraries</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
@@ -840,12 +832,12 @@ Figure&nbsp;3.4: Prediction grid (5 km spacing) created within the boundaries of
 </div>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ggplot-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.5: Using <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> to plot point data.
+Figure&nbsp;2.6: Using <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> to plot point data.
 </figcaption></figure>
 </div>
 <p>Here <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> is used to plot the spatial points. <code>aes(color = prevalence)</code> specifies that the points should be colored based on the <code>prevalence</code> covariate, providing a visual representation of spatial variation in disease risk. The <code><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_color_viridis_c()</a></code> function applies the Viridis color scale, which is well-suited for continuous data and is friendly for those with color blindness. The <code>labels = scales::label_percent()</code> argument ensures that the color scale’s labels are displayed as percentages (e.g., 5, 10%) rather than raw decimal values. To make the plot visually clean and minimal, <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal()</a></code> is applied, stripping away unnecessary background elements and keeping the focus on the data. Finally, the <code><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs()</a></code> defines the plot title and the color legend label.</p>
-</section><section id="visualizing-polygon-data" class="level3" data-number="3.4.2"><h3 data-number="3.4.2" class="anchored" data-anchor-id="visualizing-polygon-data">
-<span class="header-section-number">3.4.2</span> Visualizing polygon data</h3>
+</section><section id="visualizing-polygon-data" class="level3" data-number="2.7.2"><h3 data-number="2.7.2" class="anchored" data-anchor-id="visualizing-polygon-data">
+<span class="header-section-number">2.7.2</span> Visualizing polygon data</h3>
 <p>Polygon data typically represents administrative boundaries, land use, or other regional divisions. We can still use <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> to create maps of polygons, optionally filling them by a covariate.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot Liberia admin 1 level boundaries </span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">liberia_admin1</span><span class="op">)</span> <span class="op">+</span></span>
@@ -888,12 +880,12 @@ Figure&nbsp;3.5: Using <code><a href="https://ggplot2.tidyverse.org/reference/gg
 </div>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ggplot-polygons-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.6: Using <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> to plot polygon data.
+Figure&nbsp;2.7: Using <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> to plot polygon data.
 </figcaption></figure>
 </div>
 <p>In this code, <code>aes(fill = area)</code> is used to fill each polygon with colors corresponding to its area. The <code>color = "black"</code> argument outlines the polygons in black, and you could set <code>fill = NA</code> to make the polygons transparent while still displaying the borders. The <code>scale_fill_distiller(direction = -1)</code> function applies a color gradient from ColorBrewer, with the <code>direction = -1</code> argument reversing the gradient (e.g., darker colors for larger areas).</p>
-</section><section id="visualizing-raster-data" class="level3" data-number="3.4.3"><h3 data-number="3.4.3" class="anchored" data-anchor-id="visualizing-raster-data">
-<span class="header-section-number">3.4.3</span> Visualizing raster data</h3>
+</section><section id="visualizing-raster-data" class="level3" data-number="2.7.3"><h3 data-number="2.7.3" class="anchored" data-anchor-id="visualizing-raster-data">
+<span class="header-section-number">2.7.3</span> Visualizing raster data</h3>
 <p>In <code>ggplot2</code>, you can visualize raster data by converting it into a data frame of coordinates and values. You can convert raster data into a format that <code>ggplot2</code> can handle by using the <code><a href="https://rspatial.github.io/terra/reference/as.data.frame.html">as.data.frame()</a></code> function from <code>terra</code>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Convert the raster to a data frame for ggplot2</span></span>
@@ -913,14 +905,14 @@ Figure&nbsp;3.6: Using <code><a href="https://ggplot2.tidyverse.org/reference/gg
 <img src="02_handling-spatial-data_files/figure-html/fig-ggplot-raster-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ggplot-raster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.7: Log-population in Liberia (2014) visualized as a raster using <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster()</a></code> with Viridis color scale.
+Figure&nbsp;2.8: Log-population in Liberia (2014) visualized as a raster using <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster()</a></code> with Viridis color scale.
 </figcaption></figure>
 </div>
 </div>
 </div>
 <p>In this example <code><a href="https://rspatial.github.io/terra/reference/as.data.frame.html">as.data.frame()</a></code> converts the raster into a data frame with x and y coordinates and their corresponding raster values and <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster()</a></code> is used to plot the raster cells, coloring them based on the population density.</p>
-</section><section id="combining-multiple-spatial-data-types" class="level3" data-number="3.4.4"><h3 data-number="3.4.4" class="anchored" data-anchor-id="combining-multiple-spatial-data-types">
-<span class="header-section-number">3.4.4</span> Combining Multiple Spatial Data Types</h3>
+</section><section id="combining-multiple-spatial-data-types" class="level3" data-number="2.7.4"><h3 data-number="2.7.4" class="anchored" data-anchor-id="combining-multiple-spatial-data-types">
+<span class="header-section-number">2.7.4</span> Combining Multiple Spatial Data Types</h3>
 <p>In many cases, it’s useful to combine different spatial data types (points, polygons, and rasters) in a single visualization. <code>ggplot2</code> allows you to overlay these layers, providing a more comprehensive view of your spatial data.</p>
 <div class="cell">
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Combine points, polygons, and raster data in one plot</span></span>
@@ -941,7 +933,7 @@ Figure&nbsp;3.7: Log-population in Liberia (2014) visualized as a raster using <
 <img src="02_handling-spatial-data_files/figure-html/fig-combined-map-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-combined-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.8: Overlay of raster (population density), polygons (admin-1 boundaries), and points (survey locations) in a single <code>ggplot2</code> map.
+Figure&nbsp;2.9: Overlay of raster (population density), polygons (admin-1 boundaries), and points (survey locations) in a single <code>ggplot2</code> map.
 </figcaption></figure>
 </div>
 </div>
@@ -962,21 +954,21 @@ Figure&nbsp;3.8: Overlay of raster (population density), polygons (admin-1 bound
 <img src="02_handling-spatial-data_files/figure-html/fig-map-elements-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-map-elements-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.9: Enhanced map with scale bar and north arrow added using the <code>ggspatial</code> package.
+Figure&nbsp;2.10: Enhanced map with scale bar and north arrow added using the <code>ggspatial</code> package.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section></section><section id="review-questions" class="level2" data-number="3.5"><h2 data-number="3.5" class="anchored" data-anchor-id="review-questions">
-<span class="header-section-number">3.5</span> Review Questions</h2>
+</section></section><section id="review-questions" class="level2" data-number="2.8"><h2 data-number="2.8" class="anchored" data-anchor-id="review-questions">
+<span class="header-section-number">2.8</span> Review Questions</h2>
 <ul>
 <li><p>What are the main differences between raster and vector data, and in which scenarios is each type commonly used in geostatistical analysis?</p></li>
 <li><p>Why is it important to ensure that spatial datasets share the same coordinate reference system (CRS)? What problems can arise if CRSs are mismatched?</p></li>
 <li><p>What are the advantages of using a projected CRS (e.g., UTM) over a geographic CRS (e.g., WGS84) in geostatistical modeling?</p></li>
 <li><p>Describe the purpose of creating a predictive grid. How does the resolution of this grid affect the model?</p></li>
 <li><p>What is the difference between extracting raster values at a point location versus using a buffer around a point?</p></li>
-</ul></section><section id="exercises" class="level2" data-number="3.6"><h2 data-number="3.6" class="anchored" data-anchor-id="exercises">
-<span class="header-section-number">3.6</span> Exercises</h2>
+</ul></section><section id="exercises" class="level2" data-number="2.9"><h2 data-number="2.9" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">2.9</span> Exercises</h2>
 <ol type="1">
 <li><p><strong>Import and visualize shapefiles</strong>: Download a shapefile of administrative boundaries for a country of your choice using the <code>rgeoboundaries</code> package. Visualize the boundaries using both base R and <code>ggplot2</code>.</p></li>
 <li><p><strong>Download and plot raster data</strong>: Use either the <code>wpgpDownloadR</code> or <code>rgee</code> package to obtain raster data (e.g., elevation or population) for the same country. Plot it using <code><a href="https://rspatial.github.io/terra/reference/plot.html">terra::plot()</a></code> and <code>ggplot2</code>.</p></li>
@@ -1084,6 +1076,9 @@ Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E Raftery. 2007. <span>“Proba
 <div id="ref-gneiting2007jasa" class="csl-entry" role="listitem">
 Gneiting, Tilmann, and Adrian E Raftery. 2007. <span>“Strictly Proper Scoring Rules, Prediction, and Estimation.”</span> <em>Journal of the American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437">https://doi.org/10.1198/016214506000001437</a>.
 </div>
+<div id="ref-harrell2015" class="csl-entry" role="listitem">
+Harrell, Frank E. 2015. <em>Regression Modeling Strategies</em>. 2nd ed. New York: Springer.
+</div>
 <div id="ref-hastie2001" class="csl-entry" role="listitem">
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2001. <em>The Elements of Statistical Learning</em>. Springer Series in Statistics. New York, NY, USA: Springer New York Inc.
 </div>
@@ -1104,6 +1099,9 @@ Kyomuhangi, Irene, Tarekegn A. Abeku, Matthew J. Kirby, Gezahegn Tesfaye, and Em
 </div>
 <div id="ref-Lovelace2020-iq" class="csl-entry" role="listitem">
 Lovelace, Robin, Jakub Nowosad, and Jannes Muenchow. 2020. <em>Geocomputation with <span>R</span></em>. London, England: CRC Press. <a href="https://r.geocompx.org/">https://r.geocompx.org/</a>.
+</div>
+<div id="ref-malariaAtlas" class="csl-entry" role="listitem">
+Lucas, Tim C. D., Anita K. Nandi, Rosalind E. Howes, Daniel J. Weiss, Ewan Cameron, Nick Golding, and Peter W. Gething. 2020. <span>“malariaAtlas: An r Interface to Global Malariometric Data Hosted by the Malaria Atlas Project.”</span> <em>Wellcome Open Research</em> 5: 74. <a href="https://doi.org/10.12688/wellcomeopenres.15987.1">https://doi.org/10.12688/wellcomeopenres.15987.1</a>.
 </div>
 <div id="ref-mahoney2023" class="csl-entry" role="listitem">
 Mahoney, Michael J, Lucas K Johnson, Julia Silge, Hannah Frick, Max Kuhn, and Colin M Beier. 2023. <span>“Assessing the Performance of Spatial Cross-Validation Approaches for Models of Spatially Structured Data.”</span> <a href="https://doi.org/10.48550/arXiv.2303.07334">https://doi.org/10.48550/arXiv.2303.07334</a>.
@@ -1190,7 +1188,7 @@ Zhang, Hao. 2002. <span>“On Estimation and Prediction for Spatial Generalized 
 Zouré, Honorat GM, Mounkaila Noma, Afework H Tekle, Uche V Amazigo, Peter J Diggle, Emanuele Giorgi, and Jan HF Remme. 2014. <span>“Geographic Distribution of Onchocerciasis in the 20 Participating Countries of the African Programme for Onchocerciasis Control: (2) Pre-Control Endemicity Levels and Estimated Number Infected.”</span> <em>Parasites &amp; Vectors</em> 7 (1): 326–26.
 </div>
 </div>
-</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
