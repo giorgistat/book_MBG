@@ -43,6 +43,60 @@ assess_pred_mlw <- readRDS("data/assess_pred_mlw.rds")
 
 assess_pred_mlw$model$pca$score$SCRPS <- NULL
 assess_pred_mlw$model$all_cov$score$SCRPS <- NULL
+
+simulate_random_effects <- function(model, nsim = 1000, grid_range = c(-10, 10), grid_length = 5000) {
+  # Extract fixed effects and RE variance
+  beta_hat <- fixef(model)
+  sigma2_hat <- as.numeric(VarCorr(model)[[1]][1])
+  
+  # Extract model frame and grouping
+  mf <- model@frame
+  group_var <- names(ranef(model))[1]
+  group_ids <- mf[[group_var]]
+  unique_groups <- unique(group_ids)
+  ngroups <- length(unique_groups)
+  
+  # Design matrix for fixed effects
+  X <- model.matrix(model)
+  
+  # Create result matrix
+  u_samples <- matrix(NA, nrow = ngroups, ncol = nsim)
+  rownames(u_samples) <- unique_groups
+  
+  # Log-posterior density function for one group
+  log_posterior_u <- function(u, y_j, X_j, beta_hat, sigma2_hat) {
+    eta <- as.vector(X_j %*% beta_hat) + u
+    loglik <- sum(dpois(y_j, lambda = exp(eta), log = TRUE))
+    logprior <- dnorm(u, mean = 0, sd = sqrt(sigma2_hat), log = TRUE)
+    return(loglik + logprior)
+  }
+  
+  # For each group, compute posterior samples of u_j
+  for (j in seq_along(unique_groups)) {
+    gid <- unique_groups[j]
+    idx <- which(group_ids == gid)
+    y_j <- model@resp$y[idx]
+    X_j <- X[idx, , drop = FALSE]
+    
+    # Create grid and compute log posterior
+    u_grid <- seq(grid_range[1], grid_range[2], length.out = grid_length)
+    logdens <- sapply(u_grid, log_posterior_u, y_j = y_j, X_j = X_j,
+                      beta_hat = beta_hat, sigma2_hat = sigma2_hat)
+    logdens <- logdens - max(logdens)
+    dens <- exp(logdens)
+    pdf_u <- dens / sum(dens)
+    cdf_u <- cumsum(pdf_u)
+    cdf_u <- cdf_u / max(cdf_u)
+    
+    # Drop duplicated CDF values (necessary for approx)
+    keep <- !duplicated(cdf_u)
+    u_samples[j, ] <- approx(cdf_u[keep], u_grid[keep], xout = runif(nsim), rule = 2)$y
+    
+  }
+  
+  return(u_samples)
+}
+
 ```
 
 # Case studies {#sec-case-studies}
@@ -1024,7 +1078,221 @@ We compared two geostatistical models: one using all environmental covariates as
 
 We encourage the reader to explore Exercise 2 at the end of this chapter, where you will investigate whether including a second principal component (PC2) alongside PC1 leads to improved predictive performance. This offers an opportunity to assess whether PCA-based dimensionality reduction can match or exceed the predictive accuracy of models that include all covariates, while potentially offering greater parsimony.
 
-## Mapping mosquitoes abundance in Cameroon
+## Mapping the entomological incoluation rate for West Nile Virus in Placer County, United States
+
+In this section, we use entomological surveillance data from the `vectorsurvR` R package, which provides detailed records of mosquito collections, species identification, trapping effort, and pathogen testing across multiple locations in the United States. The dataset includes mosquito pool-level information such as counts, species, trap dates and locations, and test results for several arboviruses.
+
+This analysis focuses on the mosquito species *Culex pipiens* in Placer County, California, over the period 2015 to 2021. *Cx. pipiens* is one of the primary vector species responsible for the transmission of West Nile Virus (WNV) in North America. This time-aggregated subset allows us to investigate spatial patterns of mosquito abundance and WNV presence over several years of surveillance.
+
+West Nile Virus is an arbovirus maintained in an enzootic transmission cycle between *Culex* mosquitoes and birds, with humans and other mammals acting as incidental, dead-end hosts. Human infections can range from asymptomatic to severe neurological disease. Surveillance of both vector abundance and WNV positivity is therefore critical for anticipating human risk and targeting public health interventions. In particular, understanding spatial variation in entomological indicators—such as the expected number of infected mosquitoes—can help identify areas of elevated transmission potential and guide vector control strategies.
+
+### Exploratory analysis
+
+We begin by loading the necessary libraries and the data provided by the `vectorsurvR` package. The main dataset, `sample_pools`, contains information on mosquito pool species, collection date, location, and pathogen testing results. Additional trap-level metadata, including trapping effort, is provided in the `sample_collections` dataset.
+
+
+```{r, collapse=TRUE}
+rm(list = ls())
+
+library(vectorsurvR)
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(tigris)
+library(patchwork)
+
+options(tigris_use_cache = TRUE)
+
+data(sample_pools)
+data(sample_collections)
+```
+
+We restrict the data to mosquito pools identified as Cx pipiens and tested for WNV, across all years available in the dataset, from 2015 to 2021.
+
+```{r, collapse=TRUE}
+species_name <- "Cx pipiens"
+
+merged <- sample_pools %>%
+  filter(species_display_name == species_name,
+         test_target_acronym == "WNV") %>%
+  left_join(sample_collections %>% select(collection_id, trap_nights),
+            by = c("id" = "collection_id", "surv_year"))
+
+library(rgeoboundaries)
+ca_counties <- geoboundaries("United States of America", adm_lvl = "ADM2")
+sma_names <- c("Sacramento", "Placer", "El Dorado")
+sma_boundaries <- ca_counties[ca_counties$shapeName %in% sma_names, ]
+
+```
+
+We then group the filtered data by trap location, computing the year of the survey, the total number of mosquitoes captured, the number of pools tested for WNV, and the number of pools that tested positive. The WNV positivity rate is computed as the proportion of confirmed positive pools out of all pools tested at each site. We convert the grouped data into an `sf` object for spatial plotting and further geostatistical analysis.
+
+```{r, collapse=TRUE}
+
+wnv_summary <- merged %>%
+  group_by(pool_longitude, pool_latitude) %>%
+  summarise(
+    year = unique(surv_year),
+    total_mosquitoes = sum(num_count, na.rm = TRUE),
+    pools_tested = n(),
+    positive_pools = sum(test_status_name == "Confirmed", na.rm = TRUE),
+    total_trap_nights = sum(trap_nights, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(wnv_detected = positive_pools > 0) %>%
+  st_as_sf(coords = c("pool_longitude", "pool_latitude"), crs = 4326)
+
+bbox <- st_bbox(wnv_summary)
+```
+To provide spatial context, we use the `rgeoboundaries` package to download second-level administrative boundaries (ADM2) for the United States. We extract counties from California and subset to those overlapping with our trap locations. In this case, the relevant region includes Sacramento, Placer, and El Dorado counties — counties that collectively fall within the broader Sacramento Metropolitan Area (SMA).
+
+```{r, collapse=TRUE}
+library(rgeoboundaries)
+
+# Get California ADM2 units and filter to relevant counties
+ca_counties <- geoboundaries("United States of America", adm_lvl = "ADM2")
+sma_names <- c("Sacramento", "Placer", "El Dorado")
+sma_boundaries <- ca_counties[ca_counties$shapeName %in% sma_names, ]
+
+```
+We then visualize the data using three panels, shown in @fig-wvn-panels. The first shows the location of mosquito traps over the SMA boundary. The second shows the total number of mosquitoes captured at each location. The third displays the proportion of pools testing positive for WNV. All panels use a consistent bounding box and suppress axis ticks for cleaner comparison.
+
+```{r, collapse=TRUE}
+#| label: fig-wnv-panels
+#| fig-cap: "Spatial summary of *Cx. pipiens* surveillance data in the Sacramento Metropolitan Area (2015–2021). The left panel shows trap locations, the middle panel shows mosquito abundance, and the right panel indicates whether West Nile Virus was detected at each site."
+#| fig-align: "center"
+#| fig-width: 14
+#| fig-height: 15
+#| collapse: true
+
+# Panel 1: Trap locations
+p1 <- ggplot() +
+  geom_sf(data = sma_boundaries, fill = "grey95", color = "black", size = 0.3) +
+  geom_sf(data = wnv_summary, color = "black", alpha = 0.6, size = 0.4) +
+  theme_minimal() +
+  labs(title = "Trap locations") +
+  theme(
+    plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+# Panel 2: Mosquito counts (scaled)
+p2 <- ggplot() +
+  geom_sf(data = sma_boundaries, fill = NA, color = "black", size = 0.3) +
+  geom_sf(data = wnv_summary, aes(size = total_mosquitoes), color = "red", alpha = 0.6) +
+  coord_sf(
+    xlim = c(bbox["xmin"] - 0.005, bbox["xmax"] + 0.005),
+    ylim = c(bbox["ymin"] - 0.005, bbox["ymax"] + 0.005)
+  ) +
+  scale_size_continuous(name = "Mosquitoes captured", range = c(0.8, 4)) +
+  theme_minimal() +
+  labs(title = "Cx. pipiens counts") +
+  theme(
+    plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+# Panel 3: WNV detection
+p3 <- ggplot() +
+  geom_sf(data = sma_boundaries, fill = NA, color = "black", size = 0.3) +
+  geom_sf(data = wnv_summary, aes(color = wnv_detected), size = 2.4, alpha = 0.7) +
+  scale_color_manual(name = "WNV detected", values = c("FALSE" = "grey60", "TRUE" = "blue")) +
+  coord_sf(
+    xlim = c(bbox["xmin"] - 0.005, bbox["xmax"] + 0.005),
+    ylim = c(bbox["ymin"] - 0.005, bbox["ymax"] + 0.005)
+  ) +
+  theme_minimal() +
+  labs(title = "WNV detection") +
+  theme(
+    plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+# Combine the panels
+(p1 | p2 | p3) +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    title = "Mosquito Surveillance in the Sacramento Metropolitan Area (2015–2021)",
+    theme = theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+      plot.caption = element_text(size = 9, hjust = 0.5, margin = margin(t = 10))
+    )
+  )
+
+
+```
+Given the time span of the data, it is important to consider the potential for temporal variation in mosquito abundance and infection prevalence. Changes in environmental conditions, climate, or vector control efforts may lead to substantial year-to-year fluctuations in mosquito populations. Additionally, if different geographic areas were sampled in different years, this could introduce spatial confounding, making it difficult to disentangle spatial from temporal effects.
+
+Visual inspection of the top panel in @fig-wnv-years suggests that, although in some years the surveys were carried out in different areas, there is still some spatial overlap that may help us to estimate the year-to-year variation. This observation indicates that spatial coverage was not uniform over time, and motivates caution when interpreting temporal trends in abundance or infection risk.
+
+Nonetheless, the bottom panel of @fig-wnv-years shows that the average number of mosquitoes captured per trap was relatively stable across years, with the exception of noticeably lower values from 2019 to 2021. This suggests that overall mosquito activity did not vary drastically, at least when aggregated annually. Moreover, the presence of a reasonable degree of spatial overlap between years supports the inclusion of survey year as a covariate in geostatistical models, to account for temporal effects while retaining sufficient spatial information for reliable inference.
+
+```{r}
+#| label: fig-wnv-years
+#| fig-cap: "Spatial and temporal overview of *Cx. pipiens* surveillance in the Sacramento Metropolitan Area from 2015 to 2021. The top panel shows the spatial distribution of trap locations for each year. The bottom panel displays the annual average number of mosquitoes captured per trap, illustrating variation in abundance over time."
+#| fig-align: "center"
+#| fig-width: 18
+#| fig-height: 25
+#| collapse: true
+
+
+# Panel 1: Faceted trap locations by year (larger points and titles)
+p_locs <- ggplot(wnv_summary) +
+  geom_sf(data = sma_boundaries, fill = NA, color = "black", size = 0.3) +
+  geom_sf(color = "black", alpha = 0.8, size = 0.8) +
+  facet_wrap(~year, ncol = 4) +
+  theme_minimal() +
+  labs(title = "Trap locations by year") +
+  theme(
+    strip.text = element_text(size = 13, face = "bold"),
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+# Summary for bar plot
+annual_summary <- wnv_summary %>%
+  group_by(year) %>%
+  summarise(
+    total_mosquitoes = sum(total_mosquitoes, na.rm = TRUE),
+    total_traps = n(),  # each row in wnv_summary corresponds to a trap location
+    mosq_per_trap = total_mosquitoes / total_traps,
+    .groups = "drop"
+  )
+
+# Panel 2: Average mosquitoes per trap event by year
+p_pertrap <- ggplot(annual_summary, aes(x = factor(year), y = mosq_per_trap)) +
+  geom_col(fill = "steelblue") +
+  theme_minimal() +
+  labs(title = "Average mosquitoes per trap", x = "Year", y = "Mosquitoes per trap") +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 11)
+  )
+
+# Combine panels: faceted maps on top, bar chart on bottom
+(p_locs / p_pertrap) +
+  plot_layout(heights = c(3, 1)) +
+  plot_annotation(
+    theme = theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5)
+    )
+  )
+
+
+```
+
+### Modelling number of mosquitoes
+
+```{r, eval=FALSE}
+
+
+```
+
 
 ## Exercises
 
