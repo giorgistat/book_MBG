@@ -254,10 +254,10 @@ window.Quarto = {
   </ul>
 </li>
   <li>
-<a href="#mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-placer-county-united-states" id="toc-mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-placer-county-united-states" class="nav-link" data-scroll-target="#mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-placer-county-united-states"><span class="header-section-number">5.3</span> Mapping the entomological incoluation rate for West Nile Virus in Placer County, United States</a>
+<a href="#mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-the-sacramento-metropolitan-area-united-states" id="toc-mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-the-sacramento-metropolitan-area-united-states" class="nav-link" data-scroll-target="#mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-the-sacramento-metropolitan-area-united-states"><span class="header-section-number">5.3</span> Mapping the entomological incoluation rate for West Nile Virus in the Sacramento Metropolitan Area, United States</a>
   <ul class="collapse">
 <li><a href="#exploratory-analysis-2" id="toc-exploratory-analysis-2" class="nav-link" data-scroll-target="#exploratory-analysis-2"><span class="header-section-number">5.3.1</span> Exploratory analysis</a></li>
-  <li><a href="#modelling-number-of-mosquitoes" id="toc-modelling-number-of-mosquitoes" class="nav-link" data-scroll-target="#modelling-number-of-mosquitoes"><span class="header-section-number">5.3.2</span> Modelling number of mosquitoes</a></li>
+  <li><a href="#predicting-the-average-number-of-mosquitoes" id="toc-predicting-the-average-number-of-mosquitoes" class="nav-link" data-scroll-target="#predicting-the-average-number-of-mosquitoes"><span class="header-section-number">5.3.2</span> Predicting the average number of mosquitoes</a></li>
   </ul>
 </li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">5.4</span> Exercises</a></li>
@@ -1519,10 +1519,10 @@ Figure&nbsp;5.13: Plot of the average non-randomized probability integral transf
 <p>To address potential collinearity and reduce the complexity of the model, we also illustrated the use of PCA as a method for dimensionality reduction. The first principal component (PC1) captured a dominant environmental gradient, summarizing variation across temperature, humidity, elevation, and vegetation, which was then used as a composite predictor in a reduced model. A simpler alternative is to let the data guide you through stepwise selection based on p-values—for example, adding or removing covariates until all retained terms meet a preset significance threshold. When the pool of candidate predictors is large relative to the sample size, however, stepwise methods can become unstable and over-fit; in such cases penalised approaches (e.g.&nbsp;ridge, lasso) or resampling-based strategies are usually preferred. A thorough discussion of these issues, with practical recommendations, is given in Section 4.7 of <span class="citation" data-cites="harrell2015">Harrell (<a href="references.html#ref-harrell2015" role="doc-biblioref">2015</a>)</span>.</p>
 <p>We compared two geostatistical models: one using all environmental covariates as separate predictors (with spline terms for nonlinear effects), and another using PC1 as a summary predictor. Cross-validation based on geographically stratified folds revealed that the full model was better calibrated and achieved sharper predictions, as measured by lower CRPS and AnPIT curves closer to the identity line.</p>
 <p>We encourage the reader to explore Exercise 2 at the end of this chapter, where you will investigate whether including a second principal component (PC2) alongside PC1 leads to improved predictive performance. This offers an opportunity to assess whether PCA-based dimensionality reduction can match or exceed the predictive accuracy of models that include all covariates, while potentially offering greater parsimony.</p>
-</section></section><section id="mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-placer-county-united-states" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-placer-county-united-states">
-<span class="header-section-number">5.3</span> Mapping the entomological incoluation rate for West Nile Virus in Placer County, United States</h2>
+</section></section><section id="mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-the-sacramento-metropolitan-area-united-states" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="mapping-the-entomological-incoluation-rate-for-west-nile-virus-in-the-sacramento-metropolitan-area-united-states">
+<span class="header-section-number">5.3</span> Mapping the entomological incoluation rate for West Nile Virus in the Sacramento Metropolitan Area, United States</h2>
 <p>In this section, we use entomological surveillance data from the <code>vectorsurvR</code> R package, which provides detailed records of mosquito collections, species identification, trapping effort, and pathogen testing across multiple locations in the United States. The dataset includes mosquito pool-level information such as counts, species, trap dates and locations, and test results for several arboviruses.</p>
-<p>This analysis focuses on the mosquito species <em>Culex pipiens</em> in Placer County, California, over the period 2015 to 2021. <em>Cx. pipiens</em> is one of the primary vector species responsible for the transmission of West Nile Virus (WNV) in North America. This time-aggregated subset allows us to investigate spatial patterns of mosquito abundance and WNV presence over several years of surveillance.</p>
+<p>This analysis focuses on the mosquito species <em>Culex pipiens</em> in areas across the Sacramento Metropolitan Area (SMA), California, over the period 2015 to 2021. <em>Cx. pipiens</em> is one of the primary vector species responsible for the transmission of West Nile Virus (WNV) in North America. This time-aggregated subset allows us to investigate spatial patterns of mosquito abundance and WNV presence over several years of surveillance.</p>
 <p>West Nile Virus is an arbovirus maintained in an enzootic transmission cycle between <em>Culex</em> mosquitoes and birds, with humans and other mammals acting as incidental, dead-end hosts. Human infections can range from asymptomatic to severe neurological disease. Surveillance of both vector abundance and WNV positivity is therefore critical for anticipating human risk and targeting public health interventions. In particular, understanding spatial variation in entomological indicators—such as the expected number of infected mosquitoes—can help identify areas of elevated transmission potential and guide vector control strategies.</p>
 <section id="exploratory-analysis-2" class="level3" data-number="5.3.1"><h3 data-number="5.3.1" class="anchored" data-anchor-id="exploratory-analysis-2">
 <span class="header-section-number">5.3.1</span> Exploratory analysis</h3>
@@ -1575,7 +1575,7 @@ Figure&nbsp;5.13: Plot of the average non-randomized probability integral transf
 <span></span>
 <span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html">st_bbox</a></span><span class="op">(</span><span class="va">wnv_summary</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>To provide spatial context, we use the <code>rgeoboundaries</code> package to download second-level administrative boundaries (ADM2) for the United States. We extract counties from California and subset to those overlapping with our trap locations. In this case, the relevant region includes Sacramento, Placer, and El Dorado counties — counties that collectively fall within the broader Sacramento Metropolitan Area (SMA).</p>
+<p>To provide spatial context, we use the <code>rgeoboundaries</code> package to download second-level administrative boundaries (ADM2) for the United States. We extract the boundaries for Placer, El Dorado and Sacrament counties which make up the SMA.</p>
 <div class="cell">
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/wmgeolab/rgeoboundaries">rgeoboundaries</a></span><span class="op">)</span></span>
 <span></span>
@@ -1585,7 +1585,7 @@ Figure&nbsp;5.13: Plot of the average non-randomized probability integral transf
 <span><span class="va">sma_boundaries</span> <span class="op">&lt;-</span> <span class="va">ca_counties</span><span class="op">[</span><span class="va">ca_counties</span><span class="op">$</span><span class="va">shapeName</span> <span class="op"><a href="https://rspatial.github.io/terra/reference/match.html">%in%</a></span> <span class="va">sma_names</span>, <span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We then visualize the data using three panels, shown in <span class="quarto-unresolved-ref">?fig-wvn-panels</span>. The first shows the location of mosquito traps over the SMA boundary. The second shows the total number of mosquitoes captured at each location. The third displays the proportion of pools testing positive for WNV. All panels use a consistent bounding box and suppress axis ticks for cleaner comparison.</p>
-<div class="cell" data-layout-align="center">
+<div class="cell">
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Panel 1: Trap locations</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sma_boundaries</span>, fill <span class="op">=</span> <span class="st">"grey95"</span>, color <span class="op">=</span> <span class="st">"black"</span>, size <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1643,9 +1643,9 @@ Figure&nbsp;5.13: Plot of the average non-randomized probability integral transf
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-wnv-panels" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-wnv-panels" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-wnv-panels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="05_case-studies_files/figure-html/fig-wnv-panels-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+<img src="05_case-studies_files/figure-html/fig-wnv-panels-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-wnv-panels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;5.14: Spatial summary of <em>Cx. pipiens</em> surveillance data in the Sacramento Metropolitan Area (2015–2021). The left panel shows trap locations, the middle panel shows mosquito abundance, and the right panel indicates whether West Nile Virus was detected at each site.
@@ -1654,8 +1654,7 @@ Figure&nbsp;5.14: Spatial summary of <em>Cx. pipiens</em> surveillance data in t
 </div>
 </div>
 <p>Given the time span of the data, it is important to consider the potential for temporal variation in mosquito abundance and infection prevalence. Changes in environmental conditions, climate, or vector control efforts may lead to substantial year-to-year fluctuations in mosquito populations. Additionally, if different geographic areas were sampled in different years, this could introduce spatial confounding, making it difficult to disentangle spatial from temporal effects.</p>
-<p>Visual inspection of the top panel in <a href="#fig-wnv-years" class="quarto-xref">Figure&nbsp;<span>5.15</span></a> suggests that, although in some years the surveys were carried out in different areas, there is still some spatial overlap that may help us to estimate the year-to-year variation. This observation indicates that spatial coverage was not uniform over time, and motivates caution when interpreting temporal trends in abundance or infection risk.</p>
-<p>Nonetheless, the bottom panel of <a href="#fig-wnv-years" class="quarto-xref">Figure&nbsp;<span>5.15</span></a> shows that the average number of mosquitoes captured per trap was relatively stable across years, with the exception of noticeably lower values from 2019 to 2021. This suggests that overall mosquito activity did not vary drastically, at least when aggregated annually. Moreover, the presence of a reasonable degree of spatial overlap between years supports the inclusion of survey year as a covariate in geostatistical models, to account for temporal effects while retaining sufficient spatial information for reliable inference.</p>
+<p>The top panel of <a href="#fig-wnv-years" class="quarto-xref">Figure&nbsp;<span>5.15</span></a> reveals that while some spatial variation in sampling locations is present across years, there remains sufficient geographic overlap to enable estimation of temporal trends in mosquito counts. The bottom panel shows a clear temporal pattern: mosquito abundance was highest in 2015, remained relatively stable from 2016 to 2018, and then declined noticeably from 2019 to 2021. The observed decline in Cx. pipiens abundance from 2019 to 2021 likely reflects two key drivers: reduced availability of aquatic breeding sites due to drought, and intensified vector control efforts. <span class="citation" data-cites="bhattachan2023drought">Bhattachan et al. (<a href="references.html#ref-bhattachan2023drought" role="doc-biblioref">2023</a>)</span> showed that <em>Cx. pipiens</em> populations in southern California dropped by about <span class="math inline">\(40\%\)</span> during the 2012–2016 drought, linked to water-use restrictions that limited larval habitat in storm drains and catch basins. At the same time, vector control districts expanded targeted interventions. For example, the Sacramento–Yolo district treated over 160,000 drains in 2018 alone <span class="citation" data-cites="sacramento2018annual">(<a href="references.html#ref-sacramento2018annual" role="doc-biblioref">Sacramento-Yolo Mosquito and Vector Control District 2018</a>)</span>, and the statewide response plan formalised such practices as part of integrated mosquito management <span class="citation" data-cites="cdph2025response">(<a href="references.html#ref-cdph2025response" role="doc-biblioref">California Department of Public Health 2025</a>)</span>. This temporal feature of the data will thus need to be acknowledged in the next stage of the analysis of the data.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span></span>
 <span><span class="co"># Panel 1: Faceted trap locations by year (larger points and titles)</span></span>
@@ -1712,8 +1711,103 @@ Figure&nbsp;5.15: Spatial and temporal overview of <em>Cx. pipiens</em> surveill
 </div>
 </div>
 </div>
-</section><section id="modelling-number-of-mosquitoes" class="level3" data-number="5.3.2"><h3 data-number="5.3.2" class="anchored" data-anchor-id="modelling-number-of-mosquitoes">
-<span class="header-section-number">5.3.2</span> Modelling number of mosquitoes</h3>
+</section><section id="predicting-the-average-number-of-mosquitoes" class="level3" data-number="5.3.2"><h3 data-number="5.3.2" class="anchored" data-anchor-id="predicting-the-average-number-of-mosquitoes">
+<span class="header-section-number">5.3.2</span> Predicting the average number of mosquitoes</h3>
+<p>We aim to assess whether there is residual spatial correlation in mosquito counts by fitting the following Poisson mixed-effects model. Let <span class="math inline">\(Y_i\)</span> denote the number of mosquitoes trapped at location <span class="math inline">\(x_i\)</span> and year <span class="math inline">\(t_i\)</span>. Conditionally on independent and identically distributed zero-mean Gaussian random effects <span class="math inline">\(Z_i \sim \mathcal{N}(0, \sigma^2)\)</span>, we assume: <span class="math display">\[
+Y_i \mid Z_i \sim \text{Poisson}(\lambda_i),
+\]</span> with the log-intensity <span class="math inline">\(\lambda_i\)</span> modelled as: <span id="eq-wvn-counts"><span class="math display">\[
+\log\{\lambda_i\} =
+\beta_1 \, I(t_i = 2015) +
+\beta_2 \, I(2016 \leq t_i \leq 2018) +
+\beta_3 \, I(2019 \leq t_i \leq 2021) +
+Z_i.
+\tag{5.3}\]</span></span> We thus fit this model using the <code>glmer</code> function from the <code>lme4</code> package as follows.</p>
+<div class="cell">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Creation of the indicator functions the different year categories</span></span>
+<span><span class="va">wnv_summary</span><span class="op">$</span><span class="va">group_year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span>  <span class="va">wnv_summary</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2015</span> <span class="op">~</span> <span class="st">"2015"</span>,</span>
+<span>  <span class="va">wnv_summary</span><span class="op">$</span><span class="va">year</span> <span class="op"><a href="https://rspatial.github.io/terra/reference/match.html">%in%</a></span> <span class="fl">2016</span><span class="op">:</span><span class="fl">2018</span> <span class="op">~</span> <span class="st">"2016–2018"</span>,</span>
+<span>  <span class="va">wnv_summary</span><span class="op">$</span><span class="va">year</span> <span class="op"><a href="https://rspatial.github.io/terra/reference/match.html">%in%</a></span> <span class="fl">2019</span><span class="op">:</span><span class="fl">2021</span> <span class="op">~</span> <span class="st">"2019–2021"</span>,</span>
+<span>  <span class="cn">TRUE</span> <span class="op">~</span> <span class="cn">NA_character_</span></span>
+<span><span class="op">)</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"2015"</span>, <span class="st">"2016–2018"</span>, <span class="st">"2019–2021"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># ID of the locations</span></span>
+<span><span class="va">wnv_summary</span><span class="op">$</span><span class="va">loc</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">wnv_summary</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Model fitting</span></span>
+<span><span class="va">glmer_wvn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/glmer.html">glmer</a></span><span class="op">(</span><span class="va">total_mosquitoes</span> <span class="op">~</span> <span class="op">-</span><span class="fl">1</span> <span class="op">+</span> <span class="va">group_year</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">loc</span><span class="op">)</span>,</span>
+<span>                   data <span class="op">=</span> <span class="va">wnv_summary</span>, family <span class="op">=</span> <span class="va">poisson</span>,</span>
+<span>                   nAGQ <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Summar of the model fit</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summary.html">summary</a></span><span class="op">(</span><span class="va">glmer_wvn</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Adaptive
+  Gauss-Hermite Quadrature, nAGQ = 100) [glmerMod]
+ Family: poisson  ( log )
+Formula: total_mosquitoes ~ -1 + group_year + (1 | loc)
+   Data: wnv_summary
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   2068.7    2086.3   -1030.4    2060.7       594 
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-0.86585 -0.34677  0.01158  0.14640  0.22637 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ loc    (Intercept) 1.281    1.132   
+Number of obs: 598, groups:  loc, 598
+
+Fixed effects:
+                    Estimate Std. Error z value Pr(&gt;|z|)    
+group_year2015       2.53010    0.13030   19.42   &lt;2e-16 ***
+group_year2016–2018  2.14894    0.07930   27.10   &lt;2e-16 ***
+group_year2019–2021  1.86157    0.07315   25.45   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Correlation of Fixed Effects:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            g_2015 g_2016
+g_2016–2018 0.006        
+g_2019–2021 0.006  0.012 </code></pre>
+</div>
+</div>
+<p>The summary of the model fit above shows that, as expected, the average mosquito counts were highest in 2015, declined moderately between 2016 and 2018, and were lowest during 2019–2021. All year-group effects are highly statistically significant. The relatively large estimate of the variance <span class="math inline">\(\sigma^2\)</span> of the random effect <span class="math inline">\(Z_i\)</span> suggests substantial extra-Poisson variation between traps that is not explained by year alone.</p>
+<p>We then use the empirical variogram computed on the estimated <span class="math inline">\(Z_i\)</span> to assess the presence of residual spatial correlation.</p>
+<div class="cell">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extracting the estimates of the random effects</span></span>
+<span><span class="va">wnv_summary</span><span class="op">$</span><span class="va">Z_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/random.effects.html">ranef</a></span><span class="op">(</span><span class="va">glmer_wvn</span><span class="op">)</span><span class="op">$</span><span class="va">loc</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Computing the empirical variogram</span></span>
+<span><span class="va">variogram_wnv</span> <span class="op">&lt;-</span> </span>
+<span><span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/s_variogram.html">s_variogram</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">wnv_summary</span>, </span>
+<span>            variable <span class="op">=</span> <span class="st">"Z_hat"</span>,</span>
+<span>            n_permutation <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>            scale_to_km <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>            bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">10</span>, length <span class="op">=</span> <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We then plot the empirical variogram and add the envelope generated under the assumption of absence of spatial correlation.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/plot_s_variogram.html">plot_s_variogram</a></span><span class="op">(</span><span class="va">variogram_wnv</span>, plot_envelope <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-wnv-variogram" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-wnv-variogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="05_case-studies_files/figure-html/fig-wnv-variogram-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-wnv-variogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.16: Empirical variogram (black line) for based on the random effects fitted from the model in <a href="#eq-wvn-counts" class="quarto-xref">Equation&nbsp;<span>5.3</span></a>. The shaded blue area correspond to the envelope of spatial independence at 95% confidence level generated using a permuation test.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The empirical variogram shown in <a href="#fig-wnv-variogram" class="quarto-xref">Figure&nbsp;<span>5.16</span></a> lies entirely within the simulation envelope, indicating no detectable spatial correlation in the residuals. This lack of evidence may be due to the fact that mosquito abundance is influenced by very local environmental conditions such as vegetation, drainage, or breeding site availability, which vary at spatial scales smaller than 1 km. Since only a few trap locations in the dataset are spaced closely enough to capture such fine-scale variation, the analysis may lack the resolution needed to detect spatial dependence. Therefore, although a geostatistical model is not justified in this case, we can still pursue our objective of estimating the average number of mosquitoes at the sampled locations.</p>
 </section></section><section id="exercises" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="exercises">
 <span class="header-section-number">5.4</span> Exercises</h2>
 <ol type="1">
@@ -1770,6 +1864,9 @@ Amazigo, U. 2008. <span>“The African Programme for Onchocerciasis Control (APO
 <div id="ref-bates2015" class="csl-entry" role="listitem">
 Bates, Douglas, Martin Mächler, Ben Bolker, and Steve Walker. 2015. <span>“Fitting Linear Mixed-Effects Models Using <span class="nocase">lme4</span>.”</span> <em>Journal of Statistical Software</em> 67 (1): 1–48. <a href="https://doi.org/10.18637/jss.v067.i01">https://doi.org/10.18637/jss.v067.i01</a>.
 </div>
+<div id="ref-bhattachan2023drought" class="csl-entry" role="listitem">
+Bhattachan, Abhinav, Rachel Barrios, Laura Harrington, Valerie A. Paz-Soldan, and A. Marm Kilpatrick. 2023. <span>“Drought-Associated Reductions in Urban Mosquito Abundance During California’s Historic Drought.”</span> <em>Science of The Total Environment</em> 891: 164519. <a href="https://doi.org/10.1016/j.scitotenv.2023.164519">https://doi.org/10.1016/j.scitotenv.2023.164519</a>.
+</div>
 <div id="ref-bishop2006" class="csl-entry" role="listitem">
 Bishop, Christopher M. 2006. <em>Pattern Recognition and Machine Learning</em>. Springer.
 </div>
@@ -1784,6 +1881,9 @@ Breslow, N. E., and D. G. Clayton. 1993. <span>“Approximate Inference in Gener
 </div>
 <div id="ref-brooks2011handbook" class="csl-entry" role="listitem">
 Brooks, Steve, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng. 2011. <em>Handbook of Markov Chain Monte Carlo</em>. CRC Press.
+</div>
+<div id="ref-cdph2025response" class="csl-entry" role="listitem">
+California Department of Public Health. 2025. <span>“California Mosquito-Borne Virus Surveillance and Response Plan.”</span> Online.
 </div>
 <div id="ref-chilesdelfiner2016" class="csl-entry" role="listitem">
 Chilès, J-P, and P. Delfiner. 2016. <em>Geostatistics (Second Edition)</em>. Hoboken: Wiley.
@@ -1925,6 +2025,9 @@ Rossky, Peter J., J. D. Doll, and Harold L. Friedman. 1978. <span>“Brownian Dy
 </div>
 <div id="ref-rue2009" class="csl-entry" role="listitem">
 Rue, H., S. Martino, and N. Chopin. 2009. <span>“Approximate Bayesian Inference for Latent Gaussian Models by Using Integrated Nested Laplace Approximations.”</span> <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em> 71 (2): 319–92. <a href="https://doi.org/10.1111/j.1467-9868.2008.00700.x">https://doi.org/10.1111/j.1467-9868.2008.00700.x</a>.
+</div>
+<div id="ref-sacramento2018annual" class="csl-entry" role="listitem">
+Sacramento-Yolo Mosquito and Vector Control District. 2018. <span>“2018 Annual Report.”</span> Online.
 </div>
 <div id="ref-shmueli2010" class="csl-entry" role="listitem">
 Shmueli, Galit. 2010. <span>“To Explain or to Predict?”</span> <em>Statistical Science</em> 25 (3): 289–310.

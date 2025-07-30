@@ -16,6 +16,7 @@ library(rgeoboundaries)
 library(terra)
 library(grid)
 library(RiskMap)
+
 waz_fit <- readRDS("data/waz_fit.rds")
 haz_fit <- readRDS("data/haz_fit.rds")
 stunting_prev <- readRDS("data/stuntin_prev.rds")
@@ -96,6 +97,7 @@ simulate_random_effects <- function(model, nsim = 1000, grid_range = c(-10, 10),
   
   return(u_samples)
 }
+
 
 ```
 
@@ -1078,11 +1080,11 @@ We compared two geostatistical models: one using all environmental covariates as
 
 We encourage the reader to explore Exercise 2 at the end of this chapter, where you will investigate whether including a second principal component (PC2) alongside PC1 leads to improved predictive performance. This offers an opportunity to assess whether PCA-based dimensionality reduction can match or exceed the predictive accuracy of models that include all covariates, while potentially offering greater parsimony.
 
-## Mapping the entomological incoluation rate for West Nile Virus in Placer County, United States
+## Mapping the entomological incoluation rate for West Nile Virus in the Sacramento Metropolitan Area, United States
 
 In this section, we use entomological surveillance data from the `vectorsurvR` R package, which provides detailed records of mosquito collections, species identification, trapping effort, and pathogen testing across multiple locations in the United States. The dataset includes mosquito pool-level information such as counts, species, trap dates and locations, and test results for several arboviruses.
 
-This analysis focuses on the mosquito species *Culex pipiens* in Placer County, California, over the period 2015 to 2021. *Cx. pipiens* is one of the primary vector species responsible for the transmission of West Nile Virus (WNV) in North America. This time-aggregated subset allows us to investigate spatial patterns of mosquito abundance and WNV presence over several years of surveillance.
+This analysis focuses on the mosquito species *Culex pipiens* in areas across the Sacramento Metropolitan Area (SMA), California, over the period 2015 to 2021. *Cx. pipiens* is one of the primary vector species responsible for the transmission of West Nile Virus (WNV) in North America. This time-aggregated subset allows us to investigate spatial patterns of mosquito abundance and WNV presence over several years of surveillance.
 
 West Nile Virus is an arbovirus maintained in an enzootic transmission cycle between *Culex* mosquitoes and birds, with humans and other mammals acting as incidental, dead-end hosts. Human infections can range from asymptomatic to severe neurological disease. Surveillance of both vector abundance and WNV positivity is therefore critical for anticipating human risk and targeting public health interventions. In particular, understanding spatial variation in entomological indicators—such as the expected number of infected mosquitoes—can help identify areas of elevated transmission potential and guide vector control strategies.
 
@@ -1144,7 +1146,7 @@ wnv_summary <- merged %>%
 
 bbox <- st_bbox(wnv_summary)
 ```
-To provide spatial context, we use the `rgeoboundaries` package to download second-level administrative boundaries (ADM2) for the United States. We extract counties from California and subset to those overlapping with our trap locations. In this case, the relevant region includes Sacramento, Placer, and El Dorado counties — counties that collectively fall within the broader Sacramento Metropolitan Area (SMA).
+To provide spatial context, we use the `rgeoboundaries` package to download second-level administrative boundaries (ADM2) for the United States. We extract the boundaries for Placer, El Dorado and Sacrament counties which make up the SMA.
 
 ```{r, collapse=TRUE}
 library(rgeoboundaries)
@@ -1160,10 +1162,8 @@ We then visualize the data using three panels, shown in @fig-wvn-panels. The fir
 ```{r, collapse=TRUE}
 #| label: fig-wnv-panels
 #| fig-cap: "Spatial summary of *Cx. pipiens* surveillance data in the Sacramento Metropolitan Area (2015–2021). The left panel shows trap locations, the middle panel shows mosquito abundance, and the right panel indicates whether West Nile Virus was detected at each site."
-#| fig-align: "center"
 #| fig-width: 14
-#| fig-height: 15
-#| collapse: true
+#| fig-height: 10
 
 # Panel 1: Trap locations
 p1 <- ggplot() +
@@ -1226,9 +1226,7 @@ p3 <- ggplot() +
 ```
 Given the time span of the data, it is important to consider the potential for temporal variation in mosquito abundance and infection prevalence. Changes in environmental conditions, climate, or vector control efforts may lead to substantial year-to-year fluctuations in mosquito populations. Additionally, if different geographic areas were sampled in different years, this could introduce spatial confounding, making it difficult to disentangle spatial from temporal effects.
 
-Visual inspection of the top panel in @fig-wnv-years suggests that, although in some years the surveys were carried out in different areas, there is still some spatial overlap that may help us to estimate the year-to-year variation. This observation indicates that spatial coverage was not uniform over time, and motivates caution when interpreting temporal trends in abundance or infection risk.
-
-Nonetheless, the bottom panel of @fig-wnv-years shows that the average number of mosquitoes captured per trap was relatively stable across years, with the exception of noticeably lower values from 2019 to 2021. This suggests that overall mosquito activity did not vary drastically, at least when aggregated annually. Moreover, the presence of a reasonable degree of spatial overlap between years supports the inclusion of survey year as a covariate in geostatistical models, to account for temporal effects while retaining sufficient spatial information for reliable inference.
+The top panel of @fig-wnv-years reveals that while some spatial variation in sampling locations is present across years, there remains sufficient geographic overlap to enable estimation of temporal trends in mosquito counts. The bottom panel shows a clear temporal pattern: mosquito abundance was highest in 2015, remained relatively stable from 2016 to 2018, and then declined noticeably from 2019 to 2021. The observed decline in Cx. pipiens abundance from 2019 to 2021 likely reflects two key drivers: reduced availability of aquatic breeding sites due to drought, and intensified vector control efforts. @bhattachan2023drought showed that *Cx. pipiens* populations in southern California dropped by about $40\%$ during the 2012–2016 drought, linked to water-use restrictions that limited larval habitat in storm drains and catch basins. At the same time, vector control districts expanded targeted interventions. For example, the Sacramento–Yolo district treated over 160,000 drains in 2018 alone [@sacramento2018annual], and the statewide response plan formalised such practices as part of integrated mosquito management [@cdph2025response].  This temporal feature of the data will thus need to be acknowledged in the next stage of the analysis of the data.
 
 ```{r}
 #| label: fig-wnv-years
@@ -1286,12 +1284,75 @@ p_pertrap <- ggplot(annual_summary, aes(x = factor(year), y = mosq_per_trap)) +
 
 ```
 
-### Modelling number of mosquitoes
+### Predicting the average number of mosquitoes
 
+We aim to assess whether there is residual spatial correlation in mosquito counts by fitting the following Poisson mixed-effects model. Let $Y_i$ denote the number of mosquitoes trapped at location $x_i$ and year $t_i$. Conditionally on independent and identically distributed zero-mean Gaussian random effects $Z_i \sim \mathcal{N}(0, \sigma^2)$, we assume:
+$$
+Y_i \mid Z_i \sim \text{Poisson}(\lambda_i),
+$$
+with the log-intensity $\lambda_i$ modelled as:
+$$
+\log\{\lambda_i\} = 
+\beta_1 \, I(t_i = 2015) + 
+\beta_2 \, I(2016 \leq t_i \leq 2018) + 
+\beta_3 \, I(2019 \leq t_i \leq 2021) + 
+Z_i.
+$$ {#eq-wvn-counts}
+We thus fit this model using the `glmer` function from the `lme4` package as follows.
+```{r}
+
+# Creation of the indicator functions the different year categories
+wnv_summary$group_year <- factor(case_when(
+  wnv_summary$year == 2015 ~ "2015",
+  wnv_summary$year %in% 2016:2018 ~ "2016–2018",
+  wnv_summary$year %in% 2019:2021 ~ "2019–2021",
+  TRUE ~ NA_character_
+), levels = c("2015", "2016–2018", "2019–2021"))
+
+
+# ID of the locations
+wnv_summary$loc <- 1:nrow(wnv_summary)
+
+# Model fitting
+glmer_wvn <- glmer(total_mosquitoes ~ -1 + group_year + (1 | loc),
+                   data = wnv_summary, family = poisson,
+                   nAGQ = 100)
+
+# Summar of the model fit
+summary(glmer_wvn)
+```
+The summary of the model fit above shows that, as expected, the average mosquito counts were highest in 2015, declined moderately between 2016 and 2018, and were lowest during 2019–2021. The relatively large estimate of the variance $\sigma^2$ of the random effect $Z_i$ suggests substantial extra-Poisson variation between traps that is not explained by year alone. 
+
+We then use the empirical variogram computed on the estimated $Z_i$ to assess the presence of residual spatial correlation. 
 ```{r, eval=FALSE}
 
+# Extracting the estimates of the random effects
+wnv_summary$Z_hat <- ranef(glmer_wvn)$loc[,1]
+
+# Computing the empirical variogram
+variogram_wnv <- 
+s_variogram(data = wnv_summary, 
+            variable = "Z_hat",
+            n_permutation = 1000,
+            scale_to_km = TRUE,
+            bins = seq(0,10, length = 15))
 
 ```
+We then plot the empirical variogram and add the envelope generated under the assumption of absence of spatial correlation.
+```{r,echo=FALSE}
+variogram_wnv <- readRDS("data/variogram_wnv.rds")
+```
+```{r,collapse=TRUE}
+#| label: fig-wnv-variogram
+#| fig-cap: "Empirical variogram (black line) for based on the random effects fitted from the model in @eq-wvn-counts. The shaded blue area correspond to the envelope of spatial independence at 95% confidence level generated using a permuation test. "
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 15
+#| collapse: true
+plot_s_variogram(variogram_wnv, plot_envelope = TRUE)
+```
+
+The empirical variogram shown in @fig-wnv-variogram lies entirely within the simulation envelope, indicating no detectable spatial correlation in the residuals. This lack of evidence may be due to the fact that mosquito abundance is influenced by very local environmental conditions such as vegetation, drainage, or breeding site availability, which vary at spatial scales smaller than 1 km. Since only a few trap locations in the dataset are spaced closely enough to capture such fine-scale variation, the analysis may lack the resolution needed to detect spatial dependence. Therefore, although a geostatistical model is not justified in this case, we can still pursue our objective of estimating the average number of mosquitoes at the sampled locations.
 
 
 ## Exercises
