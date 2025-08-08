@@ -258,6 +258,7 @@ window.Quarto = {
   <ul class="collapse">
 <li><a href="#exploratory-analysis-2" id="toc-exploratory-analysis-2" class="nav-link" data-scroll-target="#exploratory-analysis-2"><span class="header-section-number">5.3.1</span> Exploratory analysis</a></li>
   <li><a href="#predicting-the-average-number-of-mosquitoes" id="toc-predicting-the-average-number-of-mosquitoes" class="nav-link" data-scroll-target="#predicting-the-average-number-of-mosquitoes"><span class="header-section-number">5.3.2</span> Predicting the average number of mosquitoes</a></li>
+  <li><a href="#predicting-the-entomological-incolutation-rate" id="toc-predicting-the-entomological-incolutation-rate" class="nav-link" data-scroll-target="#predicting-the-entomological-incolutation-rate"><span class="header-section-number">5.3.3</span> Predicting the entomological incolutation rate</a></li>
   </ul>
 </li>
   <li>
@@ -1846,7 +1847,6 @@ Figure&nbsp;5.16: Empirical variogram (black line) for based on the random effec
 <span><span class="va">mosq_lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">mean_nmosq</span>, <span class="fl">1</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.025</span><span class="op">)</span></span>
 <span><span class="va">mosq_upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">mean_nmosq</span>, <span class="fl">1</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.975</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>In</p>
 <p>The posterior predictions shown in <a href="#fig-mosq-predictions" class="quarto-xref">Figure&nbsp;<span>5.17</span></a> indicate that the pattern of the mean number of mosquitoes across sampled locations is broadly comparable across the three time periods defined by <code>group_year</code>. While some small variation in magnitude is visible, the predictive means and the dispersion around them are similar across time.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create dataframe</span></span>
@@ -1880,6 +1880,129 @@ Figure&nbsp;5.17: Predictive mean number of mosquitoes per location with associa
 </div>
 </div>
 </div>
+</section><section id="predicting-the-entomological-incolutation-rate" class="level3" data-number="5.3.3"><h3 data-number="5.3.3" class="anchored" data-anchor-id="predicting-the-entomological-incolutation-rate">
+<span class="header-section-number">5.3.3</span> Predicting the entomological incolutation rate</h3>
+<div class="cell">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">inf_fit</span> <span class="op">&lt;-</span></span>
+<span><span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/glgpm.html">glgpm</a></span><span class="op">(</span><span class="va">positive_pools</span> <span class="op">~</span> <span class="op">-</span><span class="fl">1</span> <span class="op">+</span> <span class="va">group_year</span> <span class="op">+</span> <span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/gp.html">gp</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>      par0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">)</span>, start_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">)</span>,</span>
+<span>      data <span class="op">=</span> <span class="va">wnv_summary</span>,</span>
+<span>      family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summary.html">summary</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Binomial geostatistical linear model 
+'Lower limit' and 'Upper limit' are the limits of the 95% confidence level intervals 
+
+ Regression coefficients 
+                    Estimate Lower limit Upper limit   StdErr  z.value
+group_year2015       0.51296    -0.73492     1.76084  0.63669   0.8057
+group_year2016–2018 -0.98330    -1.34337    -0.62322  0.18371  -5.3523
+group_year2019–2021 -2.32760    -2.64800    -2.00719  0.16348 -14.2381
+                      p.value    
+group_year2015         0.4204    
+group_year2016–2018 8.683e-08 ***
+group_year2019–2021 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Offset included into the linear predictor 
+
+ Spatial Guassian process 
+Matern covariance parameters (kappa=0.5) 
+                     Estimate Lower limit Upper limit
+Spatial process var.   8.4668      4.9707      14.422
+Spatial corr. scale   51.0331     33.2925      78.227
+Variance of the nugget effect fixed at 0 
+
+ Log-likelihood: 1.018464</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Compute convex hull</span></span>
+<span><span class="va">geom_union</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">$</span><span class="va">data_sf</span><span class="op">)</span></span>
+<span><span class="va">chull_sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_convex_hull</a></span><span class="op">(</span><span class="va">geom_union</span><span class="op">)</span></span>
+<span><span class="va">chull_sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>geometry <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">chull_sf</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                     crs <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">$</span><span class="va">data_sf</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot points and convex hull</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">inf_fit</span><span class="op">$</span><span class="va">data_sf</span>, color <span class="op">=</span> <span class="st">"blue"</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">chull_sf</span>, fill <span class="op">=</span> <span class="cn">NA</span>, color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="05_case-studies_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">grid_pred_sac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/create_grid.html">create_grid</a></span><span class="op">(</span><span class="va">chull_sf</span>, spat_res <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">predictors_sac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>group_year <span class="op">=</span></span>
+<span>                               <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"2019–2021"</span>, <span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html">st_coordinates</a></span><span class="op">(</span><span class="va">grid_pred_sac</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                                          levels <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/factors.html">levels</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">$</span><span class="va">data_sf</span><span class="op">$</span><span class="va">group_year</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pred_S_inf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/pred_over_grid.html">pred_over_grid</a></span><span class="op">(</span><span class="va">inf_fit</span>, predictors <span class="op">=</span> <span class="va">predictors_sac</span>,</span>
+<span>                         grid_pred <span class="op">=</span> <span class="va">grid_pred_sac</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pred_inf_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/pred_target_grid.html">pred_target_grid</a></span><span class="op">(</span><span class="va">pred_S_inf</span>,</span>
+<span>                             f_target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>prev <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">/</span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">pred_inf_grid</span>,<span class="st">"prev"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="05_case-studies_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_S_obs_loc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://claudiofronterre.github.io/RiskMap/reference/pred_over_grid.html">pred_over_grid</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mu_hat_inf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">$</span><span class="va">D</span><span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">inf_fit</span><span class="op">)</span><span class="op">$</span><span class="va">beta</span><span class="op">)</span></span>
+<span><span class="va">prev_inf_samples</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">mu_hat_inf</span> <span class="op">+</span></span>
+<span>                        <span class="va">pred_S_obs_loc</span><span class="op">$</span><span class="va">S_samples</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># EIC samples (elementwise)</span></span>
+<span><span class="va">eic_samples</span> <span class="op">&lt;-</span> <span class="va">mean_nmosq</span> <span class="op">*</span> <span class="va">prev_inf_samples</span></span>
+<span><span class="co"># eic_samples should be locations x draws</span></span>
+<span></span>
+<span><span class="co"># Calculate EIC summaries</span></span>
+<span><span class="va">eic_mean</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">eic_samples</span>, <span class="fl">1</span>, <span class="va">mean</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">eic_lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">eic_samples</span>, <span class="fl">1</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.025</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">eic_upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">eic_samples</span>, <span class="fl">1</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.975</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Build dataframe directly from original wnv_summary order</span></span>
+<span><span class="va">eic_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  loc_id     <span class="op">=</span> <span class="va">wnv_summary</span><span class="op">$</span><span class="va">loc</span>,</span>
+<span>  group_year <span class="op">=</span> <span class="va">wnv_summary</span><span class="op">$</span><span class="va">group_year</span>,</span>
+<span>  mean       <span class="op">=</span> <span class="va">eic_mean</span>,</span>
+<span>  lower      <span class="op">=</span> <span class="va">eic_lower</span>,</span>
+<span>  upper      <span class="op">=</span> <span class="va">eic_upper</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Order by mean but keep mapping intact</span></span>
+<span><span class="va">eic_df</span> <span class="op">&lt;-</span> <span class="va">eic_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">eic_df</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">eic_df</span><span class="op">$</span><span class="va">id_sorted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">eic_df</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">eic_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">id_sorted</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">lower</span>, ymax <span class="op">=</span> <span class="va">upper</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">group_year</span>, scales <span class="op">=</span> <span class="st">"free_x"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Location (ordered)"</span>, y <span class="op">=</span> <span class="st">"Entomological Inoculation Rate (EIC)"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="05_case-studies_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section></section><section id="theory" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="theory">
 <span class="header-section-number">5.4</span> Theory</h2>
 <section id="sec-sim-re" class="level3" data-number="5.4.1"><h3 data-number="5.4.1" class="anchored" data-anchor-id="sec-sim-re">
@@ -1888,7 +2011,7 @@ Figure&nbsp;5.17: Predictive mean number of mosquitoes per location with associa
 <p>Simulating from the conditional distribution of <span class="math inline">\(Z_i\)</span>​ given the observed counts <span class="math inline">\(y_i\)</span>​ under a Poisson mixed model can be done in several ways in R, often more efficiently than the approach illustrated here. However, our goal is not to present the fastest implementation, but to offer a transparent, step-by-step example. This level of detail is useful for readers who wish to understand the underlying computations, or who may want to adapt and generalize the function for other analyses. From a pedagogical perspective, dissecting such a function provides a hands-on introduction to computational methods for generalized linear mixed models and illustrates ideas that are extended in more advanced Bayesian and likelihood-based approaches.</p>
 <p>The function is reproduced below:</p>
 <div class="cell">
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">simulate_random_effects</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">nsim</span> <span class="op">=</span> <span class="fl">1000</span>, <span class="va">grid_range</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>, <span class="va">grid_length</span> <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span> <span class="op">{</span></span>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">simulate_random_effects</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">nsim</span> <span class="op">=</span> <span class="fl">1000</span>, <span class="va">grid_range</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>, <span class="va">grid_length</span> <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Extract fixed effects and RE variance</span></span>
 <span>  <span class="va">beta_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html">fixef</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span>  <span class="va">sigma2_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html">VarCorr</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -1943,10 +2066,10 @@ Figure&nbsp;5.17: Predictive mean number of mosquitoes per location with associa
 </div>
 <p>Below, we break down the function step by step.</p>
 <p>First, we extract the fixed-effect estimates and the random effect variance from the fitted model:</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">beta_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html">fixef</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span>                        <span class="co"># Fixed effect coefficients (MLEs)</span></span>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">beta_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html">fixef</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span>                        <span class="co"># Fixed effect coefficients (MLEs)</span></span>
 <span><span class="va">sigma2_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html">VarCorr</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="co"># Estimated variance of random intercepts</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>These parameters will be treated as known when simulating the predictive of the random effects. Next, we identify the grouping variable for the random effects and compute the fixed-effects design matrix:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mf</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">@</span><span class="va">frame</span>                      <span class="co"># Model frame containing the data</span></span>
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mf</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">@</span><span class="va">frame</span>                      <span class="co"># Model frame containing the data</span></span>
 <span><span class="va">group_var</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/random.effects.html">ranef</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>     <span class="co"># Name of the grouping variable</span></span>
 <span><span class="va">group_ids</span> <span class="op">&lt;-</span> <span class="va">mf</span><span class="op">[[</span><span class="va">group_var</span><span class="op">]</span><span class="op">]</span>            <span class="co"># Group ID for each observation</span></span>
 <span><span class="va">unique_groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/unique.html">unique</a></span><span class="op">(</span><span class="va">group_ids</span><span class="op">)</span>      <span class="co"># Unique group levels</span></span>
@@ -1955,11 +2078,11 @@ Figure&nbsp;5.17: Predictive mean number of mosquitoes per location with associa
 <span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span>                <span class="co"># Fixed-effects design matrix</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Here, <code>group_ids</code> associates each observation with its random effect, and <code>D</code> is the design matrix used to compute the linear predictor for the fixed effects.</p>
 <p>We initialize a results matrix to store the predictive samples for each group:</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">u_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="va">ngroups</span>, ncol <span class="op">=</span> <span class="va">nsim</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">u_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="va">ngroups</span>, ncol <span class="op">=</span> <span class="va">nsim</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">u_samples</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">unique_groups</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Each row corresponds to a group and each column to a predictive sample of <span class="math inline">\(u_j\)</span>.</p>
 <p>We then define a helper function to compute the unnormalized log-predictive density of a single random effect <span class="math inline">\(u_j\)</span> given the data for that group:</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">log_pd_u</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">u</span>, <span class="va">y_j</span>, <span class="va">D_j</span>, <span class="va">beta_hat</span>, <span class="va">sigma2_hat</span><span class="op">)</span> <span class="op">{</span></span>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">log_pd_u</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">u</span>, <span class="va">y_j</span>, <span class="va">D_j</span>, <span class="va">beta_hat</span>, <span class="va">sigma2_hat</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">eta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span><span class="op">(</span><span class="va">D_j</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">beta_hat</span><span class="op">)</span> <span class="op">+</span> <span class="va">u</span>      <span class="co"># Linear predictor</span></span>
 <span>  <span class="va">loglik</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">dpois</a></span><span class="op">(</span><span class="va">y_j</span>, lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">eta</span><span class="op">)</span>, log <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>   <span class="co"># Poisson likelihood</span></span>
 <span>  <span class="va">logprior</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">dnorm</a></span><span class="op">(</span><span class="va">u</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">sigma2_hat</span><span class="op">)</span>, log <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># Normal prior</span></span>
@@ -1967,7 +2090,7 @@ Figure&nbsp;5.17: Predictive mean number of mosquitoes per location with associa
 <span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This combines the Poisson likelihood for the observations in group <span class="math inline">\(j\)</span> with the Gaussian prior on the random effect.</p>
 <p>For each group, we first compute the predictive on a grid of <span class="math inline">\(u\)</span> values, then normalize it to form a cumulative distribution function (CDF), and finally draw samples using inverse CDF sampling.</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_along</a></span><span class="op">(</span><span class="va">unique_groups</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_along</a></span><span class="op">(</span><span class="va">unique_groups</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">gid</span> <span class="op">&lt;-</span> <span class="va">unique_groups</span><span class="op">[</span><span class="va">j</span><span class="op">]</span></span>
 <span>  <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">group_ids</span> <span class="op">==</span> <span class="va">gid</span><span class="op">)</span></span>
 <span>  <span class="va">y_j</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">@</span><span class="va">resp</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span></span>
