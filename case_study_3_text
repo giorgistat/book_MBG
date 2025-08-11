@@ -1,0 +1,240 @@
+We aim to assess whether there is residual spatial correlation in mosquito counts by fitting the following Poisson mixed-effects model. Let $Y_i$ denote the number of mosquitoes trapped at location $x_i$ and year $t_i$. Conditionally on independent and identically distributed zero-mean Gaussian random effects $Z_i \sim \mathcal{N}(0, \sigma^2)$, we assume:
+$$
+Y_i \mid Z_i \sim \text{Poisson}(\lambda_i),
+$$
+with the log-intensity $\lambda_i$ modelled as:
+$$
+\begin{aligned}
+\log\{\lambda_i\} = & 
+\beta_1 \, I(t_i = 2015) + 
+\beta_2 \, I(2016 \leq t_i \leq 2018) + \\\\
+&
+\beta_3 \, I(2019 \leq t_i \leq 2021) + 
+Z_i \\\\
+=& \mu_i + Z_i
+\end{aligned}
+$$ {#eq-wvn-counts}
+We thus fit this model using the `glmer` function from the `lme4` package as follows.
+```{r}
+
+# Creation of the indicator functions the different year categories
+wnv_summary$group_year <- factor(case_when(
+  wnv_summary$year == 2015 ~ "2015",
+  wnv_summary$year %in% 2016:2018 ~ "2016–2018",
+  wnv_summary$year %in% 2019:2021 ~ "2019–2021",
+  TRUE ~ NA_character_
+), levels = c("2015", "2016–2018", "2019–2021"))
+
+
+# ID of the locations
+wnv_summary$loc <- 1:nrow(wnv_summary)
+
+# Model fitting
+glmer_wvn <- glmer(total_mosquitoes ~ -1 + group_year + (1 | loc),
+                   data = wnv_summary, family = poisson,
+                   nAGQ = 100)
+
+# Summar of the model fit
+summary(glmer_wvn)
+```
+The summary of the model fit above shows that, as expected, the average mosquito counts were highest in 2015, declined moderately between 2016 and 2018, and were lowest during 2019–2021. The relatively large estimate of the variance $\sigma^2$ of the random effect $Z_i$ suggests substantial extra-Poisson variation between traps that is not explained by year alone. 
+
+We then use the empirical variogram computed on the estimated $Z_i$ to assess the presence of residual spatial correlation. 
+```{r, eval=FALSE}
+
+# Extracting the estimates of the random effects
+wnv_summary$Z_hat <- ranef(glmer_wvn)$loc[,1]
+
+# Computing the empirical variogram
+variogram_wnv <- 
+s_variogram(data = wnv_summary, 
+            variable = "Z_hat",
+            n_permutation = 1000,
+            scale_to_km = TRUE,
+            bins = seq(0,10, length = 15))
+
+```
+We then plot the empirical variogram and add the envelope generated under the assumption of absence of spatial correlation.
+```{r,echo=FALSE}
+variogram_wnv <- readRDS("data/variogram_wnv.rds")
+```
+```{r,collapse=TRUE}
+#| label: fig-wnv-variogram
+#| fig-cap: "Empirical variogram (black line) for based on the random effects fitted from the model in @eq-wvn-counts. The shaded blue area correspond to the envelope of spatial independence at 95% confidence level generated using a permuation test. "
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 15
+plot_s_variogram(variogram_wnv, plot_envelope = TRUE)
+```
+
+The empirical variogram shown in @fig-wnv-variogram lies entirely within the simulation envelope, indicating no detectable spatial correlation in the residuals. This lack of evidence may be due to the fact that mosquito abundance is influenced by very local environmental conditions such as vegetation, drainage, or breeding site availability, which vary at spatial scales smaller than 1 km. Since only a few trap locations in the dataset are spaced closely enough to capture such fine-scale variation, the analysis may lack the resolution needed to detect spatial dependence. Therefore, although a geostatistical model is not justified in this case, we can still pursue our objective of estimating the average number of mosquitoes at the sampled locations using @eq-wvn-counts. 
+
+The principles used in this case to derive the predictive distribution of $\lambda(x_i)$, the expected number of mosquitoes at a sampled location $x_i$, are similar to those applied in geostatistical models. However, they take a simplified form here because we do not need to account for spatial correlation. The predictive distribution is given by:
+$$
+\left[\lambda(x_i) \:\middle | \: Y_i = y_i \right] = \int [Z_i] \, [Y_i \mid Z_i] \, dZ_i
+$$ {#eq-pred-distr}
+In this expression, $[Z_i]$ denotes the density of a Gaussian distribution with mean zero and variance $\sigma^2$, and $[Y_i \mid Z_i]$ is the likelihood from a Poisson model with mean $\lambda(x_i)$. The integral in @eq-pred-distr can be computed numerically in R with relative efficiency. This approach also allows for direct simulation from the predictive distribution, enabling us to compute any desired summary statistics.
+
+For this analysis, we use a custom function called `simulate_random_effects`, which can be copied from @sec-sim-re and pasted into an R script, as it is not included in the `RiskMap` package. Further details of its implementation are provided in @sec-sim-re; here, we focus solely on the analysis.
+
+Hence, we first simulate 1000 samples from the predictive distribution of $Z_i$ and denote those by $Z_i^{(j)}$, for $i=1,\ldots,598$, and $j=1\ldots,1000$.
+```{r,eval=FALSE}
+n_samples <- 1000
+samples_z <- simulate_random_effects(glmer_wvn, n_sim = n_samples)
+```
+
+We then obtain predictive samples for $\lambda(x_i)$ by applying the exponential transformation to the linear predictor $\hat{\mu}_i + Z_{i}^{(j)}$, where in $\hat{\mu}_i$ we have plugged in the maximum likelihood estimates of the regression coefficients. 
+
+```{r,eval=FALSE}
+beta_hat <- glmer_wvn@beta
+D <- model.matrix(glmer_wvn)
+mu_hat <- as.numeric(D%*%beta_hat)
+
+# Linear predictor samples
+eta_samples <- sapply(1:n_samples,
+                      function(i) mu_hat+samples_z[,i])
+
+# Predictive samples of the mean number of mosquitoes
+mean_nmosq <- exp(eta_samples)
+```
+Finally, we compute the predictive mean, including lower and upper bounds of the $95\%$ coverage prediction intervals.
+```{r,eval=FALSE}
+# Predictive summaries
+mosq_mean <- rowMeans(mean_nmosq)
+mosq_lower <- apply(mean_nmosq, 1, quantile, probs = 0.025)
+mosq_upper <- apply(mean_nmosq, 1, quantile, probs = 0.975)
+
+```
+
+
+```{r,echo=FALSE, collapse=TRUE}
+mosq_mean <- readRDS("data/mosq_mean.rds")
+mosq_lower <- readRDS("data/mosq_lower.rds")
+mosq_upper <- readRDS("data/mosq_upper.rds")
+```
+
+The posterior predictions shown in @fig-mosq-predictions indicate that the pattern of the mean number of mosquitoes across sampled locations is broadly comparable across the three time periods defined by `group_year`. While some small variation in magnitude is visible,  the predictive means and the dispersion around them are similar across time.
+```{r, collapse=TRUE}
+#| label: fig-mosq-predictions
+#| fig-cap: "Predictive mean number of mosquitoes per location with associated 95% prediction intervals, stratified by groups of years, namely 2015, 2016-2018 and 2019-2021. For each panel, locations are ordered by decreasing predictive mean for the number of mosquitoes. The shaded areas represent the uncertainty in the predicted means across the sampled locations."
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 15
+
+# Create dataframe
+mosq_df <- data.frame(
+  id = 1:length(mosq_mean),
+  mean = mosq_mean,
+  lower = mosq_lower,
+  upper = mosq_upper
+)
+
+# Order by descending mean
+mosq_df <- mosq_df[order(-mosq_df$mean), ]
+mosq_df$id_ordered <- factor(seq_len(nrow(mosq_df)), levels = seq_len(nrow(mosq_df)))
+mosq_df$id_sorted <- seq_len(nrow(mosq_df))
+mosq_df$group_year <- wnv_summary$group_year[match(mosq_df$id, wnv_summary$loc)]
+
+ggplot(mosq_df, aes(x = id_sorted, y = mean)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  facet_wrap(~group_year, scales = "free_x") +
+  labs(x = "Location (ordered)", y = "Mean mosquitoes") +
+  theme_minimal()
+
+```
+
+### Predicting the entomological incolutation rate
+
+```{r, echo=FALSE}
+inf_fit <- readRDS("data/inf_fit.rds")
+pred_inf_grid <- readRDS("data/pred_inf_grid.rds")
+pred_S_obs_loc <- readRDS("data/pred_S_obs_loc.rds")
+eic_df <- readRDS("data/eic_df.rds")
+```
+
+```{r,eval=FALSE}
+inf_fit <-
+glgpm(positive_pools ~ -1 + group_year + gp(),
+      par0 = coef(inf_fit), start_pars = coef(inf_fit),
+      data = wnv_summary,
+      family = "binomial")
+```
+
+```{r}
+summary(inf_fit)
+```
+
+```{r}
+# Compute convex hull
+geom_union <- st_union(inf_fit$data_sf)
+chull_sf <- st_convex_hull(geom_union)
+chull_sf <- st_as_sf(data.frame(geometry = st_sfc(chull_sf)),
+                     crs = st_crs(inf_fit$data_sf))
+
+# Plot points and convex hull
+ggplot() +
+  geom_sf(data = inf_fit$data_sf, color = "blue", size = 1) +
+  geom_sf(data = chull_sf, fill = NA, color = "red", linewidth = 1) +
+  theme_minimal()
+```
+
+```{r,eval=FALSE}
+
+grid_pred_sac <- create_grid(chull_sf, spat_res = 0.25)
+
+predictors_sac <- data.frame(group_year =
+                               factor(rep("2019–2021", nrow(st_coordinates(grid_pred_sac))),
+                                          levels = levels(inf_fit$data_sf$group_year)))
+pred_S_inf <- pred_over_grid(inf_fit, predictors = predictors_sac,
+                         grid_pred = grid_pred_sac)
+
+pred_inf_grid <- pred_target_grid(pred_S_inf,
+                             f_target = list(prev = function(x) exp(x)/(1+exp(x))))
+```
+
+```{r,eval=TRUE}
+plot(pred_inf_grid,"prev")
+```
+
+```{r,eval=FALSE}
+pred_S_obs_loc <- pred_over_grid(inf_fit)
+```
+
+```{r,eval=FALSE}
+mu_hat_inf <- as.numeric(inf_fit$D%*%coef(inf_fit)$beta)
+prev_inf_samples <- 1/(1+exp(-(mu_hat_inf +
+                        pred_S_obs_loc$S_samples)))
+
+# EIC samples (elementwise)
+eic_samples <- mean_nmosq * prev_inf_samples
+# eic_samples should be locations x draws
+
+# Calculate EIC summaries
+eic_mean  <- apply(eic_samples, 1, mean, na.rm = TRUE)
+eic_lower <- apply(eic_samples, 1, quantile, probs = 0.025, na.rm = TRUE)
+eic_upper <- apply(eic_samples, 1, quantile, probs = 0.975, na.rm = TRUE)
+
+# Build dataframe directly from original wnv_summary order
+eic_df <- data.frame(
+  loc_id     = wnv_summary$loc,
+  group_year = wnv_summary$group_year,
+  mean       = eic_mean,
+  lower      = eic_lower,
+  upper      = eic_upper
+)
+```
+
+```{r}
+# Order by mean but keep mapping intact
+eic_df <- eic_df[order(-eic_df$mean), ]
+eic_df$id_sorted <- seq_len(nrow(eic_df))
+
+# Plot
+ggplot(eic_df, aes(x = id_sorted, y = mean)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  facet_wrap(~group_year, scales = "free_x") +
+  labs(x = "Location (ordered)", y = "Entomological Inoculation Rate (EIC)") +
+  theme_minimal()
+```
