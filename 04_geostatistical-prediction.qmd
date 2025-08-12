@@ -716,7 +716,8 @@ In such cases, the PIT becomes valuable for evaluating model adequacy, as it all
 \frac{u - F_{M}(y-1)}{F_{M}(y-1) - F_{M}(y-1)}, & F_{M}(y-1) \leq u \leq F_{M}(y) \\ 
 1, & u \geq F_{M}(y)
 \end{cases}.
-$$ We then take the average nPIT over the observed outcomes $y_{1}, \ldots, y_{n}$, hence $$
+$$ {#eq-anpit} 
+We then take the average nPIT over the observed outcomes $y_{1}, \ldots, y_{n}$, hence $$
 \text{AnPIT}(u) = \frac{1}{n} \sum_{i=1}^n \text{nPIT}(u, y_{i}). 
 $$ Assessment of calibration is then carried out by checking wether the AnPIT is as close as possible to the identity function, i.e. $\text{AnPIT}(u) = u$. Hence, by plotting $\text{AnPIT}(u)$ against $u$, we can consider any deviations from the identity line as evidence that the model is not well-calibrated.
 
