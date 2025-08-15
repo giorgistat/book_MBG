@@ -1079,7 +1079,7 @@ We compared two geostatistical models: one using all environmental covariates as
 
 We encourage the reader to explore Exercise 2 at the end of this chapter, where you will investigate whether including a second principal component (PC2) alongside PC1 leads to improved predictive performance. This offers an opportunity to assess whether PCA-based dimensionality reduction can match or exceed the predictive accuracy of models that include all covariates, while potentially offering greater parsimony.
 
-## Mapping the vector index for West Nile Virus in the Sacramento Metropolitan Area, United States 
+## Mapping the vector index for West Nile Virus in the Sacramento Metropolitan Area, United States {#sec-wnv}
 
 In this section, we analyse entomological surveillance data on *Culex pipiens* in the Sacramento Metropolitan Area (SMA), California, from 2015 to 2021. *Cx. pipiens* is one of the primary vectors of West Nile virus (WNV) in North America [@petersen2013wnv; @kramer2007wnv]. WNV is a mosquito borne flavivirus sustained in an enzootic cycle, that is, persistent circulation of the virus within non human animal populations, primarily birds, in a defined geographic area. Transmission is maintained between *Culex* mosquitoes and birds, while humans and other mammals are incidental dead end hosts that do not contribute to further transmission. Most human infections are asymptomatic, a minority present with febrile illness, and a small proportion develop neuroinvasive disease [@petersen2013wnv]. Surveillance of both vector abundance and WNV infection prevalence is therefore important for anticipating human risk and guiding public health interventions.
 
@@ -1087,7 +1087,7 @@ In this analysis, we quantify local entomological risk using the vector index (V
 $$
 \text{VI} \;=\; \text{abundance} \times \text{infection prevalence}.  
 $$ {#eq-vi}
-Here, *abundance* is the mean number of female mosquitoes collected per trap night, and *infection prevalence* is the estimated proportion of mosquitoes infected with WNV in the vector population. In practice, prevalence is inferred from pooled PCR testing using maximum likelihood estimators for pooled samples [@biggerstaff2006pooledinf; @cdc_wnv_guidelines_2024]. Many operational analyses also report the minimum infection rate and apply either the maximum likelihood estimate or the minimum infection rate when computing the vector index [e.g., @bolling2009vi; @jones2011vi]. In this section, we extend these approaches using model-based geostatistics.
+Here, *abundance* is the mean number of female mosquitoes collected per trap night, and *infection prevalence* is the estimated proportion of mosquitoes infected with WNV in the vector population. In practice, prevalence is inferred from pooled PCR testing using maximum likelihood estimators for pooled samples [@cdc_wnv_guidelines_2024]. Many operational analyses also report the minimum infection rate and apply either the maximum likelihood estimate or the minimum infection rate when computing the vector index [e.g., @bolling2009vi; @jones2011vi]. In this section, we extend these approaches using model-based geostatistics.
 
 In what follows, we model abundance and infection prevalence for *Cx. pipiens* as two independent processes and combine the resulting estimates to obtain VI. We return to this assumption and other limitations of the analysis in @sec-summary-wnv.
 
@@ -1270,7 +1270,8 @@ mosq_lower <- readRDS("data/mosq_lower.rds")
 mosq_upper <- readRDS("data/mosq_upper.rds")
 ```
 
-The predictions shown in @fig-mosq-predictions indicate that the pattern of the mean number of mosquitoes across sampled locations is broadly comparable across the three time periods defined by `group_year`. While some small variation in magnitude is visible,  the predictive means and the dispersion around them are similar across time.
+The predictions shown in @fig-mosq-predictions indicate that the pattern of the mean number of mosquitoes across sampled locations is broadly comparable across time.
+
 ```{r, collapse=TRUE}
 #| label: fig-mosq-predictions
 #| fig-cap: "Predictive mean number of mosquitoes per trap-night for each location with 95% prediction intervals, stratified by year and trap group. Within each panel, locations are ordered by increasing predicted mean abundance. Shaded areas represent 95% prediction intervals for the number of mosquitoes at sampled locations. The y-axis is on a log scale, with tick labels shown on the original scale."
@@ -1349,7 +1350,186 @@ plot_anpit(wnv_anpit_res)
 
 The results shown in @fig-wnv-anpit an AnPIT curve from the fitted Poisson mixed model in @fig-wnv-anpit that closely follows the identity line. Hence, we can conclude that we find no evidence against the compatibility of the model in @fig-wnv-anpit with the data. 
 
+### Modelling West Nile virus infection with pooled mosquito testing {#sec-wnv-model}
+
+Pooled testing is widely used in mosquito surveillance. Rather than testing each mosquito individually for a pathogen, multiple mosquitoes collected from the same location and week are combined into a single pool and assayed by PCR. The test returns positive if at least one mosquito in the pool is infected and negative otherwise. This approach greatly reduces laboratory time and costs, but statistical analysis must account for variation in pool size, as larger pools have a higher probability of testing positive even if the underlying infection risk per mosquito is low.
+
+We illustrate this using West Nile virus (WNV) PCR results from pools of female *Culex pipiens* collected in the Sacramento Metropolitan Area, available in the `infect_sma` data set of the `RiskMap` package.
+
+Let $k_i$ be the number of mosquitoes in pool $i$. Define the binary outcome $Y_i=1$ if the PCR test for pool $i$ is positive and $Y_i=0$ otherwise. Conditional on a stationary and isotropic spatial Gaussian process $S(x_i)$, the probability that pool $i$ is positive is  
+$$
+P(Y_i=1\mid S(x_i))=1-\left[1-p(x_i)\right]^{k_i},
+$$ {#eq-wnv-pos-model}
+where $p(x_i)$ is the probability that an individual mosquito at location $x_i$ is infected with WNV. We model $p(x_i)$ using a logit-linear form  
+$$
+\log\left\{\frac{p(x_i)}{1-p(x_i)}\right\}=\beta+S(x_i),
+$$ {#eq-wnv-lp}
+which explicitly incorporates the dependence of the pool positivity probability on pool size $k_i$.
+
+We must emphasize that in the `infect_sma` data set the pool sizes $k_i$ are not taken directly from laboratory records but are estimated. For each pool, mosquito collections from nearby locations in the same epidemiological week and within a given spatial radius, for example 2 km, are identified. The total number of female mosquitoes from these nearby collections, denoted $T_{\text{near}}$, is divided by the number of pools formed from the same nearby collections in that week, denoted $m_{\text{near}}$, to obtain an estimate of pool size. The estimated pool size is therefore  
+$$
+\widehat{k}_i=\text{round}\left(\max\{1,T_{\text{near}}/m_{\text{near}}\}\right),
+$$
+and a default conservative value, such as 25, is used if no nearby collections are available.
+
+The data comprise 596 responses, of which only 18 pools test positive. This very low prevalence constrains our modelling choices, for example by limiting the feasibility of incorporating temporal dynamics. As a result, the model in @eq-wnv-pos-model represents the simplest specification that can still capture spatial correlation, under the simplifying assumption that WNV risk remains relatively stable over the study period. Furthermore, because there is only a single binary outcome per location, overdispersion cannot occur (see box “Why Bernoulli extra‐variation does not exist” in Section 5.1.1 of @diggleBook2019), and the empirical variogram provides limited value for assessing spatial correlation due to its high uncertainty in this context. We therefore proceed directly to fitting a geostatistical model and assess the estimate of the spatial correlation parameter, which quantifies the strength and range of spatial dependence in the data.
+
+We then proceed in R as follows. We first load the data and convert them into an `sf` object with the appropriate UTM projection. 
+```{r, eval=FALSE}
+data(infect_sma)
+
+infect_sma <- st_as_sf(infect_sma, coords = c("lon", "lat"), crs = 4326)
+wnv_crs <- propose_utm(infect_sma)
+infect_sma <- st_transform(infect_sma, wnv_crs)
+```
+
+We define the inverse link function based on @eq-wnv-pos-model and @eq-wnv-lp.
+```{r, eval=FALSE}
+invlink_wnv <- function(x) 1-(1-exp(x)/(1+exp(x)))^infect_sma$est_pool_n
+```
+
+We then fit the model by passing the inverse link function to the argument `invlink` within the `glgpm` function. 
+```{r,echo=FALSE}
+inf_fit <- readRDS("./data/inf_fit.rds")
+```
+```{r, eval=FALSE}
+inf_fit <-
+  glgpm(wnv_pos ~ gp(lon,lat),
+        crs = wnv_crs,
+        family = "binomial",
+        invlink = invlink_wnv,
+        data=infect_sma)
+```
+Finally, we examine the the summary of the fitted model. 
+```{r}
+summary(inf_fit)
+```
+The fitted model indicates a substantial spatial residual component, with the estimated scale parameter corresponding to a practical range of approximately 70 km. This represents a long‐range correlation relative to the spatial extent of the study area.
+
+We first carry out predictions over a regular grid covering the area of the data collection efforts from 2015 to 2021. To achieve this, we create a regular grid 250 meters within the convex hull boundaries obtained by the full set of locations sampled from 2015 to 2021 (see @fig-wnv-convex-hull).
+
+```{r}
+#| label: fig-wnv-convex-hull
+#| fig-cap: "Sampling locations of pooled mosquito collections testing for West Nile virus in the Sacramento Metropolitan Area (blue points) and their convex hull (red outline) defining the minimal polygon enclosing all sites."
+
+# Compute convex hull
+geom_union <- st_union(inf_fit$data_sf)
+chull_sf <- st_convex_hull(geom_union)
+chull_sf <- st_as_sf(data.frame(geometry = st_sfc(chull_sf)),
+                     crs = st_crs(inf_fit$data_sf))
+
+# Plot points and convex hull
+ggplot() +
+  geom_sf(data = inf_fit$data_sf, color = "blue", size = 1) +
+  geom_sf(data = chull_sf, fill = NA, color = "red", linewidth = 1) +
+  theme_minimal()
+```
+
+```{r, eval=FALSE}
+grid_pred_sac <- create_grid(chull_sf, spat_res = 0.25)
+
+pred_S_inf <- pred_over_grid(inf_fit,
+                             grid_pred = grid_pred_sac)
+
+pred_inf_grid <- pred_target_grid(pred_S_inf,
+                                  f_target = list(prev = function(x) exp(x)/(1+exp(x))))
+
+```
+```{r, echo=FALSE}
+pred_inf_grid <- readRDS("./data/pred_inf_grid.rds")
+```
+
+@fig-wnv-pred-map displays the predictive mean of $p(x)$ over the regular grid. Overall, the predicted prevalence of WNV is very low across the study area, with a small zone in the south‐west showing a relatively higher value of approximately $0.40\%$.
+
+```{r, collapse=TRUE}
+#| label: fig-wnv-pred-map
+#| fig-cap: "Map of the predictive mean for the prevalence of West Nile Virus infection among female *Culex pipiens* mosquitoes in an area of the Sacramento Metropolitan Area."
+plot(pred_inf_grid,"prev")
+```
+
+Finally, we predict the vector index as defined in @eq-vi. Because *Cx. pipiens* abundance and WNV infection prevalence have been modelled as independent processes, the predictions from the two models can be combined directly. Specifically, for each location in the `abund_sma` data set, we take predictive samples of WNV prevalence and multiply them by the corresponding predictive samples of the mean number of female *Cx. pipiens* per trap‐night. This yields predictive samples of the vector index, which can then be summarised or mapped as required. In R, this is implemented as follows.
+
+
+```{r,eval=FALSE}
+
+# Converting the abund_sma into an sf object
+loc_pred <- st_as_sfc(st_transform(st_as_sf(abund_sma, coords = c("lon","lat"), crs = 4326), crs = wnv_crs))
+
+# Prediction of the sptial process S(x) over the locations of the 
+# abund_sma data-set
+pred_S_loc <- pred_over_grid(inf_fit, grid_pred = loc_pred)
+
+# Computation of the samples for West Nile Virus prevalence
+beta_hat <- coef(inf_fit)$beta
+prev_inf_samples <- 1/(1+exp(-(beta_hat +
+                                 pred_S_loc$S_samples)))
+
+# Predictive samples for the vector index (VI)
+vi_samples <- mean_nmosq * prev_inf_samples
+
+# Calculate predictive summaries for VI
+vi_mean  <- apply(vi_samples, 1, mean, na.rm = TRUE)
+vi_lower <- apply(vi_samples, 1, quantile, probs = 0.025, na.rm = TRUE)
+vi_upper <- apply(vi_samples, 1, quantile, probs = 0.975, na.rm = TRUE)
+
+# Build dataframe directly from original abund_sma order
+vi_df <- data.frame(
+  id    = 1:nrow(abund_sma),
+  mean  = vi_mean,
+  lower = vi_lower,
+  upper = vi_upper,
+  trap_group = abund_sma$trap_group,
+  year       = abund_sma$year
+)
+
+# Order within (year, trap_group) by increasing mean
+vi_df <- vi_df %>%
+  group_by(year, trap_group) %>%
+  arrange(mean, .by_group = TRUE) %>%
+  mutate(x_order = dplyr::row_number()) %>%
+  ungroup()
+
+```
+
+Several U.S. programs consider a vector index (VI) of 0.75 or higher as indicative of likely human transmission and use this threshold to trigger intensified control measures [@cityofboulder_wnv_vectorindex_2025; @fortcollins_localdata_vi_2025; @fortcollins_wnv_program_manual_2014]. In @fig-vi, the dashed red line marks this operational threshold for elevated WNV risk. We observe that only in few instances before the year 2020 the predicted VI exceeded this threshold. We thus conclude that between 2015 and 2021 the risk for WNV based as measured by the VI was relatively low in the SMA.
+
+
+```{r, collapse=TRUE, echo=FALSE}
+vi_df <- readRDS("./data/vi_df.rds")
+```
+```{r}
+#| label: fig-vi
+#| fig-cap: "Predicted vector index (infected mosquitoes per trap night) by location, stratified by year and trap group. Locations within each panel are ordered by increasing predicted VI. Shaded bands represent 95% prediction intervals. The dashed red line marks the 0.75 threshold commonly used in U.S. West Nile virus surveillance to indicate elevated transmission risk. The y-axis is on a log scale with labels shown on the original scale."
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 15
+ggplot(vi_df,
+       aes(x = x_order, y = mean,
+           color = trap_group, fill = trap_group, group = trap_group)) +
+  geom_hline(yintercept = 0.75, linetype = "dashed", color = "red", linewidth = 0.8) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.20, linewidth = 0) +
+  geom_line(linewidth = 0.9) +
+  scale_y_log10(
+    breaks = c(0.01, 0.1, 1),
+    labels = scales::label_number()
+  ) +
+  facet_wrap(~ year, scales = "free_x") +
+  labs(
+    x = "Locations (ordered within trap group)",
+    y = "Vector index (infected mosquitoes per trap night)",
+    title = "West Nile Virus",
+    color = "Trap group", fill = "Trap group"
+  ) +
+  theme_minimal()
+
+```
+
 ### Summary and conclusions {#sec-summary-wnv}
+
+In this analysis, our predictive target was the vector index (VI) in @eq-vi. Our proposed modelling approach was based on the assumption that abundance and infection prevalence are two independent processes. Treating prevalence as independent of vector density is a practical simplification. It can be reasonable when the fraction of infected mosquitoes at a place and time is driven mainly by host infection dynamics, temperature dependent incubation, and mosquito age structure, whereas trap counts reflect local production, as well as catchability. 
+An interesting result of our analysis is that abundance showed no detectable residual spatial correlation, while infection prevalence did. The empirical variogram of random effects from the abundance model lay within the envelope in @fig-wnv-variogram, suggesting that remaining variation after accounting for year and trap group is dominated by micro scale heterogeneity and trap specific noise at distances smaller than those represented by the sampling design. In contrast, the infection model estimated a spatial scale of correlation that is large relative to the study area, and may be explained in terms of processes that operate over broader extents, such as movement and aggregation of avian reservoir hosts, shared urban landscape features, and temperature fields. However, as a result of the disparity in the scales of spatial dependence for the two processes and the inability of the model for abundance to interpolate at unobserved locations, we could only predict the VI at the observed locations of the abundance data.
+
+All West Nile virus data analysed in this section originate from the `vectorsurvR` workflow and are simulated rather than observed in the field. The `vectorsurvR` package provides a framework for generating realistic mosquito surveillance data by mimicking the structure, spatial layout, and sampling frequency of actual surveillance programmes. Hence, the results presented here should not be used to draw scientific conclusions about West Nile virus in the Sacramento Metropolitan Area. In addition to this, pool size is a key input when analysing pooled infection outcomes (see Exercise 6 below) and strongly affects the predictive inferences in prevalence (see Exercise 6 below). In this case study we used an estimated pool size (denoted in the text above by $k_i$) rather than laboratory recorded counts, which adds additional uncertainty that we did not propagate. The results illustrate modelling steps, diagnostics, and how to combine components to obtain the vector index, which remains useful for pedagogical purposes. 
 
 ## Theory
 
@@ -1704,3 +1884,5 @@ This helper function takes the output and produces a plot of the averaged nPIT c
     
 5.  The function `anpit_wnv()` computes the average non-randomized probability integral transform for the specific model in @eq-wnv-counts. Full details of the implementation are given in @sec-nonspat-anpit. You may wish to enhance this function in one of two ways: first, by generalising it so that it can be applied to any generalized linear mixed model with the same random effects structure; second, by replacing the Monte Carlo step that samples from a Gaussian distribution with a numerical integration approach. Once you have implemented this function, you can apply it to the analysed data-sets of the previous chapter and compare the generated AnPIT against those of the fitted geostatistical models. Does the AnPIT show an unsatisfactory diagnostic in some cases?
 
+6. Repeat the analysis in @sec-wnv from the beginning to predict the vector index, but this time assume alternative fixed values for the PCR pool size $k_i$ in @sec-wnv-model, setting all $k_i$ to 10, 25, and 50 in turn. Compare the resulting inferences on West Nile virus infection prevalence and the vector index across these three scenarios, and discuss how they differ from each other as well as from the results presented earlier in this chapter.
+ 
