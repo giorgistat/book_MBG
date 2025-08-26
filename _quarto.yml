@@ -23,6 +23,7 @@ book:
   date: "20/09/2024"
   search: true
   output-file: "Manuscript"
+  downloads: []
   
   chapters:
     - index.qmd
