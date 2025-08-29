@@ -1,6 +1,4 @@
 ---
-filters:
-  - line-highlight
 execute: 
   freeze: auto
 fig-width: 5
@@ -83,9 +81,11 @@ load("./data/fit_malkenya.RData")
 load("./data/pred_age15.RData")
 load("./data/pred_aver_pop.RData")
 load("./data/lb_pred_S_m.RData")
+lb_pred_S_m$obs_loc <- FALSE
 load("./data/lb_pred_S_j.RData")
+lb_pred_S_j$obs_loc <- FALSE
 liberia_grid <- lb_pred_S_j$grid_pred
-load("./data/an_fit.RData")
+an_fit <- readRDS("./data/an_fit.rds")
 load("./data/regularized.RData")
 regularized_scores <- regularized
 load("./data/cluster.RData")
@@ -716,7 +716,8 @@ In such cases, the PIT becomes valuable for evaluating model adequacy, as it all
 \frac{u - F_{M}(y-1)}{F_{M}(y-1) - F_{M}(y-1)}, & F_{M}(y-1) \leq u \leq F_{M}(y) \\ 
 1, & u \geq F_{M}(y)
 \end{cases}.
-$$ We then take the average nPIT over the observed outcomes $y_{1}, \ldots, y_{n}$, hence $$
+$$ {#eq-anpit} 
+We then take the average nPIT over the observed outcomes $y_{1}, \ldots, y_{n}$, hence $$
 \text{AnPIT}(u) = \frac{1}{n} \sum_{i=1}^n \text{nPIT}(u, y_{i}). 
 $$ Assessment of calibration is then carried out by checking wether the AnPIT is as close as possible to the identity function, i.e. $\text{AnPIT}(u) = u$. Hence, by plotting $\text{AnPIT}(u)$ against $u$, we can consider any deviations from the identity line as evidence that the model is not well-calibrated.
 
@@ -1289,7 +1290,7 @@ For non-linear prediction targets, i.e. targets that involve non-linear transfor
 
 \begin{align}
 E[W(T^*) | Y] &\approx  \frac{1}{B} \sum_{J=1}^B W^{*}_{(j)}), \\
-\mathrm{Var}[W(T^*) | Y] &\approx \frac{1}{B-1} \sum_{j=1}^B \left( W^{*}_{(j)} - E[W(T^*)] \right)^2.
+\text{Var}[W(T^*) | Y] &\approx \frac{1}{B-1} \sum_{j=1}^B \left( W^{*}_{(j)} - E[W(T^*)] \right)^2.
 \end{align}
 
 For more detailed explanations on this we refer you to Chapter 6 of @diggle2007book.
