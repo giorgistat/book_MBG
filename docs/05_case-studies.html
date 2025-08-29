@@ -90,7 +90,7 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-0de45b8b5f35a93596f1d788d60c4c11.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-b4a315dc253c0adfed1371f8f6efb9a0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-51aeb3c3e75aa4fd935c6ef44004bc43.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -773,7 +773,7 @@ Figure&nbsp;5.4: Assessment of the models calibration. The left panel shows the 
 <span><span class="va">mlw_admin0_ee</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/rgee/reference/sf_as_ee.html">sf_as_ee</a></span><span class="op">(</span><span class="va">mlw_admin0_sf</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Download PfPR survey data</span></span>
-<span><span class="va">mlw_pfpr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/malariaAtlas/man/getPR.html">getPR</a></span><span class="op">(</span>country <span class="op">=</span> <span class="st">"Malawi"</span>, species <span class="op">=</span> <span class="st">"Pf"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">mlw_pfpr</span> <span class="op">&lt;-</span> <span class="fu">getPR</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"Malawi"</span>, species <span class="op">=</span> <span class="st">"Pf"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">year_start</span> <span class="op">&lt;=</span> <span class="fl">2006</span> <span class="op">&amp;</span> <span class="va">year_end</span> <span class="op">&gt;=</span> <span class="fl">2006</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">longitude</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">latitude</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -1181,7 +1181,7 @@ Figure&nbsp;5.8: Pairwise Pearson correlation matrix between continuous environm
 <span><span class="va">pca_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/prcomp.html">prcomp</a></span><span class="op">(</span><span class="va">pca_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Scree plot</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/factoextra/man/eigenvalue.html">fviz_eig</a></span><span class="op">(</span><span class="va">pca_result</span>, addlabels <span class="op">=</span> <span class="cn">TRUE</span>, barfill <span class="op">=</span> <span class="st">"steelblue"</span>, barcolor <span class="op">=</span> <span class="st">"grey30"</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">fviz_eig</span><span class="op">(</span><span class="va">pca_result</span>, addlabels <span class="op">=</span> <span class="cn">TRUE</span>, barfill <span class="op">=</span> <span class="st">"steelblue"</span>, barcolor <span class="op">=</span> <span class="st">"grey30"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-pca-scree" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
