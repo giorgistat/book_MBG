@@ -1304,19 +1304,12 @@ Table&nbsp;3.1: Maximum likelihood estimates and, lower and upper limits of the 
 <span>        family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  0:    -0.0000000: -2.99847 0.313076  0.00000  4.21726
-  1:   -0.11651447: -2.99882 0.311146 -0.00391275  4.21972
-  2:   -0.35424883: -2.99956 0.306845 -0.0118250  4.22469
-  3:    -6.8587270: -2.99362 0.311502 -0.311804  4.42013
-  4:    -7.0122233: -2.99272 0.316054 -0.314226  4.42169
-  5:    -7.3998582: -2.99095 0.326564 -0.316424  4.42317
-  6:    -10.409148: -3.04416 0.341331 -0.463263  4.52276
-  7:    -12.121996: -3.13241 0.356933 -0.632090  4.57329
-  8:    -14.208345: -3.22732 0.375018 -1.22486  3.94464
-  9:    -14.749131: -3.23793 0.376984 -1.39843  3.67663
- 10:    -14.840248: -3.24034 0.377445 -1.50094  3.50301
- 11:    -14.845441: -3.24030 0.377436 -1.47997  3.52802
- 12:    -14.845449: -3.24030 0.377436 -1.47913  3.52922
- 13:    -14.845449: -3.24030 0.377436 -1.47913  3.52922</code></pre>
+  1:    -10.521749: -2.99986 0.290438 -0.707929  4.79063
+  2:    -13.372071: -2.88658 0.281097 -1.25409  4.05730
+  3:    -13.467826: -2.88606 0.281356 -1.23903  3.99514
+  4:    -13.468883: -2.88749 0.281738 -1.24413  3.98081
+  5:    -13.468884: -2.88756 0.281757 -1.24421  3.98052
+  6:    -13.468884: -2.88756 0.281757 -1.24421  3.98052</code></pre>
 </div>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">fit_liberia</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1332,8 +1325,8 @@ Inverse link function = stats::plogis(x)
 
 Regression coefficients
                 Estimate Lower limit Upper limit    StdErr z.value   p.value
-(Intercept)    -3.240301   -3.670375   -2.810226  0.219430 -14.767 &lt; 2.2e-16
-log(elevation)  0.377436    0.335691    0.419180  0.021299  17.721 &lt; 2.2e-16
+(Intercept)    -2.887561   -3.344610   -2.430512  0.233192 -12.383 &lt; 2.2e-16
+log(elevation)  0.281757    0.237081    0.326433  0.022794  12.361 &lt; 2.2e-16
                   
 (Intercept)    ***
 log(elevation) ***
@@ -1343,11 +1336,11 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Spatial Gaussian process
 Matern covariance parameters (kappa=0.5)
                      Estimate Lower limit Upper limit
-Spatial process var.  0.22784     0.19751      0.2628
-Spatial corr. scale  34.09732    29.12764     39.9149
+Spatial process var.  0.28817     0.23814      0.3487
+Spatial corr. scale  53.54476    44.11489     64.9903
 Variance of the nugget effect fixed at 0
 
-Log-likelihood: 14.84545</code></pre>
+Log-likelihood: 13.46888</code></pre>
 </div>
 </div>
 <p>When using the <code>glgpm</code> function to fit a Binomial model, we need to specify the Binomial denominators, i.e.&nbsp;the number of people tested at a location in this case, through the argument <code>den</code>. Other arguments of <code>glgpm</code> that are used for carrying out MCML are <code>control_mcmc</code>, that defines the setting parameters of the Monte Carlo Markov Chain algorithm, and <code>par0</code>, which represents our best guess for the unknown parameters of the Binomial geostatistical model. For more information on the default values of these two arguments, we refer you to the help page of the <code>glgpm</code> function. To understand how to change the default parameters in order to improve the MCML estimation, we advise you to read <a href="#sec-mcml" class="quarto-xref"><span>Section 3.5.2.1</span></a>. Also, remember that to enable the estimation of the nugget effect, <span class="math inline">\(Z_i\)</span>, you should set <code>nugget=NULL</code> in the <code>gp</code> function, since by default the <code>glgpm</code> function excludes <span class="math inline">\(Z_i\)</span>.</p>
@@ -1607,8 +1600,8 @@ L_{MC}(\theta) = \frac{1}{B} \sum_{j=1}^B \frac{[W_{(j)}, Y; \theta]}{[W_{(j)}, 
 <p>As <span class="math inline">\(B \rightarrow \infty\)</span>, the Monte Carlo likelihood <span class="math inline">\(L_{MC}\)</span> converges to the exact likelihood function described in <a href="#eq-mcml1" class="quarto-xref">Equation&nbsp;<span>3.29</span></a>. The maximization of this Monte Carlo likelihood is performed using an optimization algorithm that uses the analytical expressions of the first and second derivatives. This approach is especially useful for exploring the likelihood surface, which can be relatively flat, particularly in the space of covariance parameters. To improve the approximation of the likelihood function in equation <a href="#eq-mcml2" class="quarto-xref">Equation&nbsp;<span>3.30</span></a>, this process can be repeated iteratively, replacing <span class="math inline">\(\theta_0\)</span> after each step with the estimate obtained from equation <a href="#eq-mcml2" class="quarto-xref">Equation&nbsp;<span>3.30</span></a>, until convergence is achieved. However, due to Monte Carlo error, the estimates after each iteration may still vary considerably, making convergence difficult to reach if very strict criteria are used. In practice, relaxed convergence criteria or a fixed maximum number of iterations (typically 3-5) are employed with a sufficiently large number of Monte Carlo samples (e.g., <span class="math inline">\(10,000\)</span>). Under these conditions, we find that the procedure provides reliable parameter estimates, and the impact of Monte Carlo error on spatial prediction has been observed to be negligible.</p>
 </section><section id="sec-mcmc-mala" class="level4" data-number="3.5.2.2"><h4 data-number="3.5.2.2" class="anchored" data-anchor-id="sec-mcmc-mala">
 <span class="header-section-number">3.5.2.2</span> Monte Carlo Markov Chain: sampling from the predictive distribution of the spatial Gaussian process</h4>
-<p>Building on the outline of the MCML method from the previous section, we now address the task of sampling from the distribution <span class="math inline">\([W \mid Y]\)</span> to generate the samples <span class="math inline">\(W_{(j)}\)</span> used in equation <a href="#eq-mcml2" class="quarto-xref">Equation&nbsp;<span>3.30</span></a>. To simplify the notation, we will use <span class="math inline">\([W \mid Y]\)</span> in place of <span class="math inline">\([W \mid Y; \theta_0]\)</span>, but it is important to emphasize that the parameters <span class="math inline">\(\theta_0\)</span> are considered fixed when sampling from <span class="math inline">\([W \mid Y]\)</span>. Since direct simulation from <span class="math inline">\([W \mid Y]\)</span> is not feasible, we must rely on Markov chain Monte Carlo (MCMC) methods, which we will briefly introduce next.</p>
-<p>The Metropolis-Hastings algorithm} is a foundational technique in the field of MCMC methods, which are widely used for sampling from complex probability distributions. The primary goal of MCMC methods is to generate a sequence of samples from a target distribution where direct sampling is challenging, such as the distribution of <span class="math inline">\([W | Y]\)</span>. The Metropolis-Hastings algorithm, first introduced by <span class="citation" data-cites="metropolis1953equation">Metropolis et al. (<a href="references.html#ref-metropolis1953equation" role="doc-biblioref">1953</a>)</span> and later generalized by <span class="citation" data-cites="hastings1970monte">Hastings (<a href="references.html#ref-hastings1970monte" role="doc-biblioref">1970</a>)</span>, achieves this by constructing a Markov chain that has <span class="math inline">\([W \| Y]\)</span> as its stationary distribution. In what follows, we shall use <span class="math inline">\(\pi(W)\)</span> to denote the density function of <span class="math inline">\([W | Y]\)</span> up to a constant of proportionality.</p>
+<p>Building on the outline of the MCML method from the previous section, we now address the task of sampling from the distribution <span class="math inline">\([W \mid Y]\)</span> to generate the samples <span class="math inline">\(W_{(j)}\)</span> used in equation <a href="#eq-mcml2" class="quarto-xref">Equation&nbsp;<span>3.30</span></a>. To simplify the notation, we will use $[W Y]$$ in place of <span class="math inline">\([W \mid Y; \theta_0]\)</span>, but it is important to emphasize that the parameters <span class="math inline">\(\theta_0\)</span> are considered fixed when sampling from <span class="math inline">\([W \mid Y]\)</span>. Since direct simulation from <span class="math inline">\([W \mid Y]\)</span> is not feasible, we must rely on Markov chain Monte Carlo (MCMC) methods, which we will briefly introduce next.</p>
+<p>The Metropolis-Hastings algorithm} is a foundational technique in the field of MCMC methods, which are widely used for sampling from complex probability distributions. The primary goal of MCMC methods is to generate a sequence of samples from a target distribution where direct sampling is challenging, such as the distribution of <span class="math inline">\([W | Y]\)</span>. The Metropolis-Hastings algorithm, first introduced by <span class="citation" data-cites="metropolis1953equation">Metropolis et al. (<a href="references.html#ref-metropolis1953equation" role="doc-biblioref">1953</a>)</span> and later generalized by <span class="citation" data-cites="hastings1970monte">Hastings (<a href="references.html#ref-hastings1970monte" role="doc-biblioref">1970</a>)</span>, achieves this by constructing a Markov chain that has $[W | Y]$$ as its stationary distribution. In what follows, we shall use <span class="math inline">\(\pi(W)\)</span> to denote the density function of <span class="math inline">\([W | Y]\)</span> up to a constant of proportionality.</p>
 <p>Given a current realization <span class="math inline">\(W_{(k)}\)</span> of the distribution <span class="math inline">\([W | Y]\)</span> in the Markov chain, the algorithm proceeds as follows.</p>
 <ul>
 <li>Propose a new realization <span class="math inline">\(W_{(k+1)}\)</span> from <span class="math inline">\(q(W_{(k+1)} \mid W_{(k)})\)</span>, where <span class="math inline">\(q(\cdot \mid \cdot)\)</span> is the density function of a chosen proposal distribution.</li>

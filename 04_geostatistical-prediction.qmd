@@ -544,13 +544,11 @@ pred_n_mosq_shp$target$reg1$n_mosq
 
 Since we are not standardizing the weights, there is no need to specify `standardize_weights`, as it is set to `FALSE` by default. In the code above, we printed the mean of the predictive distribution of $T$ along with the 95% prediction interval. The point estimate of approximately 17,719 mosquitoes is likely an underestimate of the total number of Anopheles gambiae in the area, as the trap used to count the mosquitoes may not capture all of them, particularly those outside the immediate trapping zone or those active at different times.
 
-
-<!-- UP TO HERE -->
-
-
 ## Assessing the predictive performance of geostatistical models with cross-validation {#sec-compare-pp}
 
-In this section, we address the problem of identifying the geostatistical model that offers the best predictive performance among a set of candidates. However, we first need a clear definition of predictive performance which can be used to select suitable statistical tools that can be to used to evaluate it. Broadly speaking, predictive performance is defined by how well a model's predictive distribution aligns with observed data. Evaluating predictive performance requires examining two key characteristics of the predictive distribution: *sharpness* and *calibration*.
+In this section, we address the problem of identifying the geostatistical model that provides the best predictive performance among a set of candidates. To do so, we first require a clear definition of predictive performance that can be used to assess competing models. Broadly speaking, predictive performance refers to how well a model’s predictive distribution agrees with the observed data. Evaluating predictive performance therefore involves examining two key properties of the predictive distribution: *calibration* and *sharpness*. These concepts are introduced in the following sections of this chapter.
+
+We begin by describing approaches for splitting geostatistical data in order to carry out model evaluation. We then introduce procedures designed to assess the predictive distribution with respect to its *calibration* and *sharpness*.
 
 ### How to split geostatistical data for model performance comparisons {#sec-split-data}
 
@@ -558,7 +556,7 @@ To carry out the assessment and comparison of the predictive performance of geos
 
 When splitting geostatistical data-sets for model performance evaluation, it is essential to consider the objective of the spatial prediction. Here, we consider two main prediction objectives: 1) predicting in areas disjoint from the study area where there are no data; 2) inferring the spatial surface of disease risk within a given study area. Let us give an example to better explain the difference between these two objectives. Under objective 1), if survey data exist for a specific country, say Kenya, but not for a neighboring country, say Somalia, a model trained on Kenyan data might then be used to predict disease prevalence in Somalia. In objective 2), instead, high-resolution risk maps of a health outcome might be required within a single country. The splitting of geostatistical data for predictive performance assessment should align with the intended application of the model and reflect whether the goal is to predict in entirely disjoint areas with no data (objective 1) or to infer the spatial surface of interest within the same study area (objective 2). Below, we elaborate on suitable methods for each of these two.
 
-In the first scenario (objective 1) ), splitting the data using k-fold cross-validation with spatially coherent folds is more appropriate. These folds can be created using clustering methods such as k-means or hierarchical clustering (see @yin2024 for review of the main clustering methods). These methods group spatial locations based on their coordinates or covariates, ensuring each fold represents a distinct spatial region. This approach mimics the challenge of predicting in disjoint areas by withholding entire spatial clusters from the training data. For instance, k-means minimizes within-cluster variance to produce compact, non-overlapping groups, while hierarchical clustering organizes data into nested clusters based on a linkage criterion like geographic distance. In the code below we show an example of the use of these methods for data splitting, using the `spatial_clusterin_cv` function from the `spatialsample` package [@mahoney2023].
+In the first scenario (objective 1), splitting the data using k-fold cross-validation with spatially coherent folds is more appropriate. These folds can be created using clustering methods such as k-means or hierarchical clustering (see @yin2024 for review of the main clustering methods). These methods group spatial locations based on their coordinates or covariates, ensuring each fold represents a distinct spatial region. This approach mimics the challenge of predicting in disjoint areas by withholding entire spatial clusters from the training data. For instance, k-means minimizes within-cluster variance to produce compact, non-overlapping groups, while hierarchical clustering organizes data into nested clusters based on a linkage criterion like geographic distance. In the code below we show an example of the use of these methods for data splitting, using the `spatial_clusterin_cv` function from the `spatialsample` package [@mahoney2023].
 
 ```{r, collapse = TRUE, fig.width=12, fig.height=6}
 #| label: fig-clus-loc
@@ -588,11 +586,11 @@ library(gridExtra)
 grid.arrange(kmeans_plot, hclust_plot, ncol = 2)
 ```
 
-The results of the splitting are shown in @fig-clus-loc, where we have generated 10 folds using the k-means and hierarchical clustering methods with the default options. We can observe that the test sets are very similar, with fold 3 from the k-means and fold 7 from hierarchical clustering being identical. If using only the distance between locations to cluster the data into different folds, the choice of clustering method should have much impact on the model assessment as long as we repeat the split and assessment of the methods multiple times as we will show later in the next sections.
+The results of the splitting are shown in @fig-clus-loc, where we have generated 10 folds using the k-means and hierarchical clustering methods with the default options. We can observe that the test sets are very similar, with fold 3 from the k-means and fold 7 from hierarchical clustering being identical. If using only the distance between locations to cluster the data into different folds, the choice of clustering method should not have much impact on the model assessment as long as we repeat the split and model evaluation multiple times, as we will show later in the next sections.
 
-Before proceeding further, it is important to highlight that when the objective is predicting an outcome in entirely disjoint areas, the risks and limitations of this assessment should be carefully considered. In such cases, predictions are predominantly driven by covariates because the spatial Gaussian process $S(x)$ cannot extrapolate spatial patterns across regions with no connecting data. When the disjoint region requiring predictions is far from the sampled data, the Gaussian process contributes primarily to inflating prediction uncertainty and has no tangible impact on the point predictions, reflecting the lack of ground data in the area. Consequently, this validation approach primarily assesses the predictive power of the covariates rather than the geostatistical model as a whole. This limitation may lead to overestimating the model's generalization capabilities, especially if the model is being used to predict areas that are far away from the study area. Hence, the results of this validation should be interpreted cautiously, emphasizing the critical role of covariates in driving predictions under such conditions.
+Before proceeding further, it is important to highlight that when the objective is predicting an outcome in entirely disjoint areas, the risks and limitations of this assessment should be carefully considered. In such cases, predictions are predominantly driven by covariates because the spatial Gaussian process $S(x)$ cannot extrapolate spatial patterns across regions with no connecting data. When the disjoint region requiring predictions is far from the sampled data, the Gaussian process contributes primarily to inflating prediction uncertainty and has no tangible impact on the point predictions, reflecting the lack of ground data in the area. Consequently, this validation approach primarily assesses the predictive power of the covariates rather than the geostatistical model as a whole.  Hence, the results of this validation should be interpreted cautiously, emphasizing the critical role of covariates in driving predictions under such conditions.
 
-We now consider the second prediction objective of inferring the spatial surface within the study area. In this case, a random sampling approach can be employed. However, to preserve a good spatial coverage of the study area, a minimum distance can be imposed between selected locations. For example, methods such as spatial thinning or stratified sampling can be adapted to enforce a minimum spatial separation. This can be done in R using the `subsample.distance` function from the `spatialEco` package [@evans2021].
+We now consider the second prediction objective of inferring the spatial surface within the study area. In this case, a random sampling approach can be employed to split the data. However, to preserve a good spatial coverage of the study area, a minimum distance can be imposed between selected locations. For example, methods such as spatial thinning or stratified sampling can be adapted to enforce a minimum spatial separation. This can be done in R using the `subsample.distance` function from the `spatialEco` package [@evans2021].
 
 ```{r, collapse = TRUE, fig.width=12, fig.height=6}
 #| label: fig-reg-loc
@@ -617,7 +615,7 @@ dist40_plot <- ggplot(dist40_liberia) + geom_sf() +
 grid.arrange(dist30_plot, dist40_plot, ncol = 2)
 ```
 
-In the code above, we randomly selected 20 locations from the original data-set, enforcing minimum distances of 30 km and 40 km between points. The results are presented in @fig-reg-loc. The choice of the minimum distance for the test sample should ideally consider the spatial correlation scale (previously denoted by $\phi$) of the spatial Gaussian process $S(X)$. To minimize correlation within the test set, the minimum distance could be set to a value greater than $\phi$. However, increasing the minimum distance makes it more challenging to obtain a test set of the desired sample size. Reducing correlation within the test set is important for ensuring that the assessment of predictive performance is as robust as possible.
+In the code above, we randomly selected 20 locations from the original data-set, enforcing minimum distances of 30 km and 40 km between points. The results are presented in @fig-reg-loc. The choice of the minimum distance for the test sample should ideally consider the spatial correlation scale (previously denoted by $\phi$) of the spatial Gaussian process $S(X)$. To reduce spatial correlation within the test set, and thereby make it more informative for model assessment, the minimum distance between selected locations can be set to a value greater than $\phi$. However, increasing the minimum distance also makes it more difficult to obtain a test set with the desired sample size.
 
 A key challenge in both approaches is the potential lack of independence between the training and test data-sets due to spatial correlation. This can lead to an overly optimistic evaluation of model performance, as the training set may already contain information that is correlated with the test set. However, if we assume that all models benefit equally from this correlation during performance evaluation, the methods we illustrate next can still provide a reliable comparison of model performance in relative terms, even if the considered performance metrics may be somewhat biased.
 
@@ -625,7 +623,7 @@ A key challenge in both approaches is the potential lack of independence between
 
 A model is considered *well-calibrated* if its predictions adequately reflect the true uncertainty of the data. Assessment of a model's calibration can be carried out in several ways. We can examine the agreement between the point predictions, say $\hat{y}_i$, and the observed outcomes $y_i$, commonly referred to as *accuracy*. The mean squared error (MSE), defined as $\text{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2$, is an example of a commonly used metric to evaluate the accuracy of a model. To characterize calibration more fully, it is also essential to quantify the spread of the predictive distributions, which also defines the *precision* of predictions. For example, prediction intervals generated from the predictive distribution for $y_i$ can help assess the precision of a geostatistical model. In summary, a well-calibrated model is both accurate and precise.
 
-Assessment of the calibration of the model should precede the assessment of sharpness, since, as we shall see in the next section, this relies on the model being well-calibrated. The probability integral transform (PIT) was originally proposed by @dawid1984 as a way to assess the calibration of a model. The PIT is based on the simple observation that if we consider a variable $Y$ and apply the transformation $Y^* = F_{Y}(Y)$, where $F_{Y}(\cdot)$ is the cumulative density function (or cumulative distribution if $Y$ is discrete) of $Y$, it then follows that $Y^*$ follows a uniform distribution in the unit interval. The fundamental problem and the reason why statistical modelling exists is that we do not $F_{Y}$ but we would like to propose a model $M$ that we believe adequately approximates $F_{Y}$ with $F_{M}$. The main advantage of using the PIT is that assessment of whether $M$ is well calibrated reduces to assessing whether the transform set of data $F_{M}(y_1), \ldots, F_{M}(y_n)$ follows a uniform distribution. To illustrate this, let us a consider a simple simulated example.
+Assessment of the calibration of the model should precede the assessment of sharpness, since, as we shall see in the next section, this relies on the model being well-calibrated. The probability integral transform (PIT) was originally proposed by @dawid1984 as a way to assess the calibration of a model. The PIT is based on the simple observation that if we consider a variable $Y$ and apply the transformation $Y^* = F_{Y}(Y)$, where $F_{Y}(\cdot)$ is the cumulative density function (or cumulative distribution if $Y$ is discrete) of $Y$, it then follows that $Y^*$ follows a uniform distribution in the unit interval. The fundamental problem and the reason why statistical modelling exists is that we do not know $F_{Y}$ but we would like to propose a model $M$ that we believe adequately approximates $F_{Y}$ with $F_{M}$. The main advantage of using the PIT is that assessment of whether $M$ is well calibrated reduces to assessing whether the transform set of data $F_{M}(y_1), \ldots, F_{M}(y_n)$ follows a uniform distribution. To illustrate this, let us a consider a simple simulated example.
 
 We first create a function that can compute the PIT.
 
@@ -639,7 +637,7 @@ pit_transform <- function(data, F_M) {
 }
 ```
 
-We then apply this function to show how the assessment of calibration through the PIT is carried out under two scenarios: 1) $F_{Y}$ is a Gamma distribution with shape 2 and scale parameter 1; 2) $F_{Y}$ is Student's T distribution with 3 degrees of freedom. In each of the two scenarios, we show how the PIT behaves when our model coincides with thetrue model (i.e. $F_{M} = F_{Y}$) and when instead our model $M$ is a Gaussian distribution, with mean and variance estimated from the data.
+We then apply this function to show how the assessment of calibration through the PIT is carried out under two scenarios: 1) $F_{Y}$ is a Gamma distribution with shape 2 and scale parameter 1; 2) $F_{Y}$ is Student's T distribution with 3 degrees of freedom. In each of the two scenarios, we show how the PIT behaves when our model coincides with the true model (i.e. $F_{M} = F_{Y}$) and when instead our model $M$ is a Gaussian distribution, with mean and variance estimated from the data.
 
 ```{r, collapse=TRUE}
 #| label: fig-hist-pit
@@ -722,7 +720,8 @@ In the simulated example, the PIT might seem unnecessary because we can directly
 
 However, in the case of Binomial and Poisson geostatistical models, the marginal distribution of the data $Y$ -- unconditioned on the spatial random effects $S(x)$ -- cannot be obtained analytically. Specifically, geostatistical models for count data assume that $Y$, conditioned on $S(x)$, follows either a Binomial or Poisson distribution. But once we integrate out $S(x)$ to obtain the marginal (i.e., unconditioned) distribution of $Y$, this distribution is no longer Poisson or Binomial. Instead, it becomes an overdispersed count distribution that lacks a closed-form expression.
 
-In such cases, the PIT becomes valuable for evaluating model adequacy, as it allows for assessing the uniformity of PIT values against the assumed model distribution, even when the marginal distribution is intractable. However, direct application of the PIT raises the issue that thetransformation $F_{Y}(Y)$ does not follow a uniform distribution, because of the discrete nature of the random variable $Y$. Hence, for a given discrete-outcome model $M$, we use a modified version of the PIT, referred to as nonrandomized PIT (henceforth, nPIT), originally proposed by @czado2009, taking the form $$
+In such cases, the PIT becomes valuable for evaluating model adequacy, as it allows for assessing the uniformity of PIT values against the assumed model distribution, even when the marginal distribution is intractable. However, direct application of the PIT raises the issue that the transformation $F_{Y}(Y)$ does not follow a uniform distribution, because of the discrete nature of the random variable $Y$. Hence, for a given discrete-outcome model $M$, we use a modified version of the PIT, referred to as nonrandomized PIT (henceforth, nPIT), originally proposed by @czado2009, taking the form 
+$$
 \text{nPIT}(u,y) = 
 \begin{cases} 
 0, & u \leq F_{M}(y-1) \\ 
@@ -730,9 +729,11 @@ In such cases, the PIT becomes valuable for evaluating model adequacy, as it all
 1, & u \geq F_{M}(y)
 \end{cases}.
 $$ {#eq-anpit} 
-We then take the average nPIT over the observed outcomes $y_{1}, \ldots, y_{n}$, hence $$
+We then take the average nPIT over the observed outcomes $y_{1}, \ldots, y_{n}$, hence 
+$$
 \text{AnPIT}(u) = \frac{1}{n} \sum_{i=1}^n \text{nPIT}(u, y_{i}). 
-$$ Assessment of calibration is then carried out by checking wether the AnPIT is as close as possible to the identity function, i.e. $\text{AnPIT}(u) = u$. Hence, by plotting $\text{AnPIT}(u)$ against $u$, we can consider any deviations from the identity line as evidence that the model is not well-calibrated.
+$$ 
+Assessment of calibration is then carried out by checking wether the AnPIT is as close as possible to the identity function, i.e. $\text{AnPIT}(u) = u$. Hence, by plotting $\text{AnPIT}(u)$ against $u$, we can consider any deviations from the identity line as evidence that the model is not well-calibrated.
 
 We now illustrate the use of the AnPIT through a simulated example. We simulate data from a negative Binomial distribution, with mean $\lambda = 5$ and dispersion parameter $\alpha = 1/2$, hence $E[Y] = \lambda$ and $\text{Var}[Y] = \lambda \times (1 + \alpha \lambda)$.
 
@@ -806,11 +807,15 @@ To explain further, suppose we have fitted our model using data $Y^{(1)} = \left
 
 #### Example: assessing the calibration of two geostatistical models for riverblindness mapping {#sec-liberia-anpit}
 
-In our example on riverblindness mapping, we now consider two models. A mode, which we call $M_{0}$, which is an intercept only geostatistical model, with linear predictor $$
+In our example on riverblindness mapping, we now consider two models. A mode, which we call $M_{0}$, which is an intercept only geostatistical model, with linear predictor 
+$$
 M_{0} \: : \: \log\left\{\frac{p(x_i)}{1-p(x_i)}\right\} = \beta_0 + S(x_i) ,
-$$ and a geostatistical model, which we denote as $M_{1}$, which uses a linear spline with a not in 150 meters, and has linear predictor $$
+$$ 
+and a geostatistical model, which we denote as $M_{1}$, which uses a linear spline with a not in 150 meters, and has linear predictor
+$$
 M_{1} \: : \: \log\left\{\frac{p(x_i)}{1-p(x_i)}\right\} = \beta_0 + \beta_{1}e(x_i) + \beta_{2}\max\{e(x_i) - 150, 0\} + S(x_i).
-$$ The reason for using this type of linear spline in $M_{1}$ is explained in @sec-expl-assoc.
+$$
+The reason for using this type of linear spline in $M_{1}$ has been explained in @sec-expl-assoc.
 
 Hence, we first fit the two models.
 
@@ -861,7 +866,7 @@ grid.arrange(p1, p2, nrow = 2, heights = c(1, 1))
 
 In the above function, we have used a spatially regularized sampling scheme (`method = "clusterized"`), where the locations are at least 20 kilometers (`min_dist = 20`) apart from each other to create 10 test sets (`iter = 10`) each of size 9 (`n_size = 9`) which corresponds to 10% of the original data-set. The results reported in @fig-anpit-reg, show both the AnPIT for each of the 10 test sets and the averaged AnPIT across the 10 test sets, for both $M_0$ and $M_1$. The AnPIT plots show curves that are not too far from the identity line, which leads us to conclude that both $M_0$ and $M_1$ can be considered to be approximately well calibrated models.
 
-Let us how if these results would change if we were to split the data using a clustering algorithm approach. We then use the `assess_pp`, to create 10 folds and set `method = "cluster"`.
+We now check how much these results would change if we were to split the data using a clustering algorithm approach. We then use the `assess_pp`, to create 10 folds and set `method = "cluster"`.
 
 ```{r, eval = FALSE}
 
@@ -900,23 +905,16 @@ $$
 penalizing deviations of the predictive distribution from the observed value. The CRPS balances sharpness and calibration, with smaller values indicating better predictive performance.
 
 The *scaled CRPS (SCRPS)*, proposed by @bolin2023, refines the CRPS by addressing its dependence on the scale of the outcome variable, which can vary across observations. The SCRPS is defined as
-
 $$
 \text{SCRPS}(F_M, y_i) = -\frac{1}{2} \left[ 1 + \frac{\text{CRPS}(F_M, y_i)}{\text{CRPS}(F_M, F_M)} + \log\left\{2 \, \text{CRPS}(F_M, F_M)\right\} \right],
 $$ {#eq-scrps}
-
 where $\text{CRPS}(F_M, F_M)$ denotes the expected CRPS when the observation is drawn from the predictive distribution itself, i.e., $Y \sim F_M$.
 
 In settings where the predictive distribution is discrete, such as the Binomial and Poisson geostatistical models, a discrete analogue to CRPS is used. Let $F_M(k)$ be the cumulative distribution function over discrete support $\{0, 1, 2, \dots\}$. The discrete CRPS is given by
-
 $$
 \text{CRPS}(F_M, y_i) = \sum_{k \in \mathcal{S}}^{\infty} \left[ F_M(k) - \mathbf{1}(k \geq y_i) \right]^2,
 $$
-
-where $\mathcal{S}$ represents the support of the outcome $Y_{i}$, corresponding to $\{0,1,\ldots,m_i\}$ for the Binomial distribution, and the set of non-negative integers as in a Poisson distribution. This version remains proper and interpretable as a measure of calibration and sharpness for integer-valued outcomes. Analogously, a scaled version of the discrete CRPS can be constructed using the same transformation as in the continuous case, by replcing the continuous CRPS with its discrete counterpart in @eq-scrps.
-
-providing a scale-invariant and proper scoring rule for discrete predictive models. These discrete versions are particularly useful in count data models or models for ordinal responses.
-
+where $\mathcal{S}$ represents the support of the outcome $Y_{i}$, corresponding to $\{0,1,\ldots,m_i\}$ for the Binomial distribution, and the set of non-negative integers as in a Poisson distribution. This version remains proper and interpretable as a measure of calibration and sharpness for integer-valued outcomes. Analogously, a scaled version of the discrete CRPS can be constructed using the same transformation as in the continuous case, by replacing the continuous CRPS with its discrete counterpart in @eq-scrps.
 
 The expressions for the CRPS and SCRPS may initially appear complex, but their appropriate application and interpretation lie in understanding their differences and the contexts in which each is more suitable. These differences become more intuitive when considering the more familiar concept of the standard error. The standard error of a predictive distribution represents its uncertainty, but it is not inherently standardized. In many cases, there exists a mean-variance relationship, where the variance increases with the mean. For instance, in Poisson-distributed data, higher mean values correspond to larger variances. This lack of standardization means that directly comparing predictive uncertainties across different scales can be misleading. Similarly, the CRPS is sensitive to the scale of the predictive distribution, as it penalizes errors in absolute terms, often giving disproportionate weight to observations with larger predictive uncertainty.
 
@@ -926,7 +924,8 @@ However, while the SCRPS is more robust in settings where variability differs si
 
 When evaluating the predictive performance of a model $M$, we proceed as follows. Let $\left(x_{1}^{(i)}, \ldots, x_{m_i}^{(i)}\right)$ represent the set of locations in the $i$-th test set, for $i=1, \ldots, T$. For each location, we compute the score—either CRPS or SCRPS—and denote it as $r_{M}\left(x_{j}^{(i)}\right)$.
 
-To assess the overall performance of model $M$, we calculate a weighted average of the scores across all test sets, where the weights are proportional to the sample size of each test set. The final score assigned to model $M$ is given by: $$
+To assess the overall performance of model $M$, we calculate a weighted average of the scores across all test sets, where the weights are proportional to the sample size of each test set. The final score assigned to model $M$ is given by: 
+$$
 \frac{1}{\sum_{i=1}^T m_i} \sum_{i=1}^{T} \sum_{j=1}^{m_i} r_{M}\left(x_{j}^{(i)}\right). $$ {#eq-average-score}
 
 Models assumed to be well-calibrated and achieving a lower score based on the above expression are considered to provide sharper predictions and, consequently, better predictive performance.
@@ -996,7 +995,6 @@ p4 <- plot_score(cluster_scores,
 grid.arrange(p1, p2, p3, p4, nrow = 2, ncol = 2)
 
 ```
-
 In the code above, we evaluated the cross-validation results generated using a clustering algorithm to split the original data-set. The map reveals that the scores across most locations are generally similar, with only three locations near the coast of Liberia showing slightly lower CRPS and SCRPS values for $M_1$. This suggests a consistent predictive performance across the dataset, with some localized variations.
 
 ## Simulation-based assessment of predictive performance
@@ -1013,17 +1011,19 @@ The **true model** represents the underlying stochastic process that generates t
 
 The **candidate models** are the geostatistical models that are tested or evaluated during the simulation study. These models are proposed alternatives to approximate or recover the true spatial surface or its properties. Candidate models may differ in terms of their assumptions and model complexity.
 
-It is important to highlight that the true model not only serves as a benchmark but can also be included among the candidate models. However, the true model does not always necessarily outperform other candidate models. In some cases, certain candidate models may provide better approximations of the spatial surface or its properties, particularly when the true model's complexity is too high relative to the available sample size. Here, *model complexity* refers to the number of parameters in a model. For instance, a true geostatistical model with high complexity may include numerous covariates or a highly parameterised covariance function. When the sample size is insufficient to reliably estimate these parameters, simpler candidate models can sometimes yield better performances.
+It is important to highlight that, in a simulation study, we can also assess the predictive performance of the true model against the candidate models. Indeed, the true model does not always necessarily outperform other candidate models. In some cases, certain candidate models may provide better empirical performance in recovering the true spatial surface, particularly when the true model's complexity is too high relative to the available sample size. Here, *model complexity* refers to the number of parameters in a model. 
 
-Consider an extreme example where the true model is a spatial Gaussian process $S(x)$ with a scale parameter of $\phi = 1$. If only a very small fraction of sampled locations are at distances below 1, estimating $\phi$ accurately becomes highly challenging, especially with a small sample size. In particular the sparsity of close pairs reduces the information available to estimate the spatial dependence structure, making the estimation of $\phi$ imprecise or even unreliable. In this case, a candidate model that does not attempt to explicitly estimate the spatial dependence (e.g., a model that relies solely on spatial covariates to interpolate the surface) might perform better in recovering the spatial structure. This example suggests that a simpler or alternative model can sometimes outperform the true model under specific sampling and data constraints.
+To better understand this point, let us consider an extreme example where the true model is a spatial Gaussian process $S(x)$ with a scale parameter of $\phi = 1$. If only a very small fraction of sampled locations are at distances below 1, estimating $\phi$ accurately becomes highly challenging, especially with a small sample size. In particular the sparsity of close pairs reduces the information available to estimate the spatial dependence structure, making the estimation of $\phi$ imprecise or even unreliable. In this case, a candidate model that does not attempt to explicitly estimate the spatial dependence (e.g., a model that relies solely on spatial covariates to interpolate the surface) might perform better in recovering the spatial structure. This example suggests that a simpler or alternative model can sometimes outperform the true model under specific sampling and data constraints.
 
 At this point, a natural question arises: how should we choose the true model for a simulation study? The answer depends on the specific objectives of the study and what we aim to demonstrate. We now provide an example to demonstrate this point.
 
 #### Example
 
-In our analysis of the river blindness dataset, we now aim to evaluate the effectiveness of using elevation as a spatial predictor. To achieve this, we conduct a simulation study to compare the performance of two geostatistical models: one that incorporates elevation as a predictor and another that excludes it. This example will be revisited throughout the steps outlined in this section on simulation. We can chose the following true model (henceforth $M_T$) for the simulation $$M_{T}: \:
+In our analysis of the river blindness dataset, we now aim to evaluate the effectiveness of using elevation as a spatial predictor. To achieve this, we conduct a simulation study to compare the performance of two geostatistical models: one that incorporates elevation as a predictor and another that excludes it. This example will be revisited throughout the steps outlined in this section on simulation. We can chose the following true model (henceforth $M_T$) for the simulation 
+$$M_{T}: \:
 \log\left\{\frac{p(x_i)}{1-p(x_i)}\right\} = \beta_{0} + \beta_{1}e(x_i) + \beta_{2}\max\{e(x_i)-150, 0\} + S(x_i).
-$$ {#eq-true-model-lib} The true model, described by the equation above, assumes a nonlinear relationship with elevation based on a linear spline with a single knot at 150 meters. To simulate data from the true model, which constitutes the next step in our simulation study, we must first define the model parameter values. A reasonable approach is to use the maximum likelihood estimates obtained by fitting the binomial geostatistical model specified in @eq-true-model-lib. These estimates can be derived as shown below.
+$$ {#eq-true-model-lib} 
+The true model, described by the equation above, assumes a nonlinear relationship with elevation based on a linear spline with a single knot at 150 meters. To simulate data from the true model, which constitutes the next step in our simulation study, we must first define the model parameter values. A reasonable approach is to use the maximum likelihood estimates obtained by fitting the binomial geostatistical model specified in @eq-true-model-lib. These estimates can be derived as shown below.
 
 ```{r, eval=FALSE}
 set.seed(123)
@@ -1041,9 +1041,11 @@ true_model <- glgpm(npos ~ elevation + pmax(elevation - 150, 0) +
 coef(true_model)
 ```
 
-A natural candidate model to evaluate the usefulness of elevation as a covariate is an intercept-only model (referred to here as $M_C$). This model is defined as: $$M_{C}: \:
+A natural candidate model to evaluate the usefulness of elevation as a covariate is an intercept-only model (referred to here as $M_C$). This model is defined as: 
+$$M_{C}: \:
 \log\left\{\frac{p(x_i)}{1-p(x_i)}\right\} = \beta_{0} + S(x_i).
-$$ where no covariates are included. This approach makes $M_C$ a suitable baseline model, commonly selected when the objective is to assess the contribution of covariates to spatial prediction.
+$$ 
+where no covariates are included. This approach makes $M_C$ a suitable baseline model, commonly selected when the objective is to assess the contribution of covariates to spatial prediction.
 
 ### Step 2: Simulate the spatial surface and the data from the true model
 
@@ -1106,7 +1108,7 @@ lib_surf_sim <- surf_sim(n_sim = 200,
 
 In the above function, we have simulated $B = 200$ simulations from the true model as specified in `formula`. The argument `par0` is used to pass the values of the parameters of the true model.
 
-We can now inspect the individual simulated surfaces using the `plot_sim_surf` function, as demonstrated below, which produces @fig-surf-sim. This step is useful verifying that the simulations are consistent with expectations and free from any warning signs or anomalies.
+We can now inspect the individual simulated surfaces using the `plot_sim_surf` function, as demonstrated below, which produces @fig-surf-sim. This step is useful for verifying that the simulations are consistent with expectations and free from any warning signs or anomalies.
 
 ```{r, eval = FALSE}
 plot_sim_surf(lib_surf_sim, sim = 1)
@@ -1116,7 +1118,7 @@ plot_sim_surf(lib_surf_sim, sim = 1)
 
 ### Step 3: Fit the candidate models to the simulated data and predict the target {#sec-sim-step3}
 
-To summarize, the results obtained from Step 1 and Step 2 are as follows:
+To summarize, the outputs obtained from Step 1 and Step 2 are as follows:
 
 1.  Simulated values for the linear predictor of the true model ($M_T$) over a grid covering the study area.
 2.  Simulated values for the linear predictor of $M_T$ at the data locations.
@@ -1149,10 +1151,10 @@ $$
 $$
 
 The median absolute deviation (MAD) focuses on the central tendency of the errors, providing a robust measure of variability. It is defined as:
-
 $$
 \text{median}\left(\left|T(\tilde{x}_i) - T^*_{C}(\tilde{x}_i)\right|\right),
-$$ where $T^*_{C}(\tilde{x}_i)$ is the median across all $N$ the Monte Carlo samples $T_{(j)}^{(h)}(\tilde{x})$.
+$$
+where $T^*_{C}(\tilde{x}_i)$ is the median across all $N$ the Monte Carlo samples $T_{(j)}^{(h)}(\tilde{x})$.
 
 #### Example
 
@@ -1180,12 +1182,11 @@ The results reported here present the average and standard deviation across 200 
 
 This result should not be surprising, as estimating regression relationships with prevalence data can be challenging, potentially limiting their predictive advantage. However, incorporating covariates enhances model interpretability, allowing us to understand why the model makes certain predictions in specific areas, which an intercept-only model cannot provide. Thus, even if the model with covariates does not achieve the best predictive performance, we may still choose to retain the covariates, in this case elevation, for their interpretative value.  
  
-
 ### Assessessment of threshold-based classification of spatial units using geostatistical models {#sec-sim-assessment}
 
-In this section, we address the specific problem of evaluating how effectively a geostatistical model classifies areal units into predefined categories of a disease indicator, such as prevalence. This issue is particularly relevant when dealing with areal-level targets (@sec-areal-target) as opposed to spatially continuous targets (@sec-spat-cont-target). This prediction problem arises when policy decisions regarding interventions are often based on the classification of the areal-level target into predefined categories at the level of administrative regions; see, for example, @johnson2021 and @puranik2024.
+In this section, we address the specific problem of evaluating how effectively a geostatistical model classifies areal units into predefined categories of a disease indicator, such as prevalence. This issue is particularly relevant when dealing with areal-level targets (@sec-areal-target) as opposed to spatially continuous targets (@sec-spat-cont-target). This prediction problem arises when policy decisions regarding interventions are often based on the classification of an areal-level predictive target (e.g. district-wide average prevalence) into predefined categories; see, for example, @johnson2021 and @puranik2024.
 
-To formalize this problem mathematically, let $\mathcal{M}_i$ represent the true value of the areal-level target (e.g., the average prevalence over a district), and let $\hat{\mathcal{M}}_{C,i}$ denote the corresponding prediction produced by the candidate model $M_C$. Note that $\mathcal{M}_i$ can be easily calculated in Step 1 during simulations from the true model (@sec-sim-step1).
+To formalize this problem, let $\mathcal{M}_i$ represent the true value of the areal-level target (e.g., the average prevalence over a district), and let $\hat{\mathcal{M}}_{C,i}$ denote the corresponding prediction produced by the candidate model $M_C$. Note that $\mathcal{M}_i$ can be easily calculated in Step 1 during simulations from the true model (@sec-sim-step1).
 
 Now, consider that the target $\mathcal{M}_i$ is categorized into predefined classes, which are typically thresholds or ranges of the disease indicator (such as values that define low, medium, and high levels). Denote the true membership class of areal unit $i$ by $\mathcal{D}_i$, which is determined based on $\mathcal{M}_i$, and the predicted membership class by $\hat{\mathcal{D}}_{C,i}$, determined based on $\hat{\mathcal{M}}_{C,i}$. The goal is to assess the overall quality of the classification, which involves evaluating how well the predicted classes $\hat{\mathcal{D}}_{C,i}$ agree with the true classes $\mathcal{C}_i$ across all areal units and simulations. This assessment provides insight into the model's ability to accurately classify regions according to the chosen disease indicator and thus guide effective policy decisions.
 
@@ -1200,7 +1201,7 @@ Assessing classification performance can be approached similarly to evaluating a
     \text{Sensitivity} = \frac{\text{True Positives (TP)}}{\text{True Positives (TP)} + \text{False Negatives (FN)}}
     $$
 
-2.  *Specificity* (True Negative Rate): The proportion of areal units not belonging to a given membership class that are correctly classified as not being in that class:\
+2.  *Specificity*: The proportion of areal units not belonging to a given membership class that are correctly classified as not being in that class:\
     $$
     \text{Specificity} = \frac{\text{True Negatives (TN)}}{\text{True Negatives (TN)} + \text{False Positives (FP)}}
     $$
@@ -1268,7 +1269,9 @@ Finally, we can examine the results of the simulation through the summary functi
 summary(res_sim_area)
 ```
 
-In this example, the performance of models $M_T$​ and $M_C$​ is comparable across all considered indicators. This similarity arises for the same reasons previously discussed examining the quality of prevalence surface predictions.
+In this example, the performance of models $M_T$​ and $M_C$​ is comparable across all considered indicators. This similarity arises for the same reasons previously discussed when examining the quality of the predictions for the prevalence surface.
+
+<!-- UP TO HERE -->
 
 ## Theory {#sec-theory-prediction}
 
